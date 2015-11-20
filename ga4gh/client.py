@@ -9,6 +9,8 @@ import requests
 import posixpath
 import logging
 
+import google.protobuf.json_format as json_format
+
 import ga4gh.protocol as protocol
 import ga4gh.exceptions as exceptions
 
@@ -31,8 +33,10 @@ class AbstractClient(object):
         self._logger.debug("response:{}".format(jsonResponseString))
         if jsonResponseString == '':
             raise exceptions.EmptyResponseException()
-        responseObject = protocolResponseClass.fromJsonString(
-            jsonResponseString)
+        self._updateBytesRead(jsonResponseString)
+        self._debugResponse(jsonResponseString)
+        responseObject = protocolResponseClass()
+        json_format.Parse(jsonResponseString, responseObject)
         return responseObject
 
     def _runSearchPageRequest(
@@ -447,7 +451,7 @@ class HttpClient(AbstractClient):
     def _runSearchPageRequest(
             self, protocolRequest, objectName, protocolResponseClass):
         url = posixpath.join(self._urlPrefix, objectName + '/search')
-        data = protocolRequest.toJsonString()
+        data = json_format.MessageToJson(protocolRequest)
         self._logger.debug("request:{}".format(data))
         response = self._session.post(
             url, params=self._getHttpParameters(), data=data)

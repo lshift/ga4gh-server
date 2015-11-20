@@ -12,7 +12,7 @@ import fnmatch
 import os
 import inspect
 
-import ga4gh.avrotools as avrotools
+# import ga4gh.avrotools as avrotools
 
 
 def _wrapTestMethod(method):
@@ -265,12 +265,14 @@ class DataDrivenTest(TestCase):
         of the specified protocol class.
         """
         if not protocolClass.validate(jsonDict):
-            validator = avrotools.Validator(protocolClass)
-            invalidFields = validator.getInvalidFields(jsonDict)
+            # validator = avrotools.Validator(protocolClass)
+            # invalidFields = validator.getInvalidFields(jsonDict)
             message = (
                 "{} is not a valid instance of {}. "
                 "Invalid fields = {}".format(
-                    jsonDict, protocolClass, invalidFields))
+                    jsonDict, protocolClass
+                    # , invalidFields
+                ))
             assert False, message
 
     def testProtocolElementValid(self):

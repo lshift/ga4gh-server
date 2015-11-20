@@ -11,7 +11,6 @@ import zlib
 import inspect
 
 import ga4gh.protocol as protocol
-import ga4gh.avrotools as avrotools
 
 
 def getExceptionClass(errorCode):
@@ -146,9 +145,11 @@ class RequestValidationFailureException(BadRequestException):
         messageString = (
             "Request '{}' is not a valid instance of {}; "
             "invalid fields: {}")
-        validator = avrotools.Validator(requestClass)
+        # validator = avrotools.Validator(requestClass)
         self.message = messageString.format(
-            jsonDict, requestClass, validator.getInvalidFields(jsonDict))
+            jsonDict, requestClass
+            # , validator.getInvalidFields(jsonDict)
+            )
 
 
 class BadReadsSearchRequestBothRefs(BadRequestException):
@@ -519,12 +520,14 @@ class ResponseValidationFailureException(ServerError):
     A validation of the response data failed
     """
     def __init__(self, jsonDict, requestClass):
-        validator = avrotools.Validator(requestClass)
+        # validator = avrotools.Validator(requestClass)
         self.message = (
             "Response '{}' is not a valid instance of {}. "
             "Invalid fields: {} "
             "Please file a bug report.".format(
-                jsonDict, requestClass, validator.getInvalidFields(jsonDict)))
+                jsonDict, requestClass
+                # , validator.getInvalidFields(jsonDict)
+            ))
 
 
 #####################################################################

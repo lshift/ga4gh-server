@@ -12,7 +12,7 @@ import unittest
 import avro.schema
 
 import ga4gh.protocol as protocol
-import ga4gh.avrotools as avrotools
+# import ga4gh.avrotools as avrotools
 import tests.utils as utils
 
 
@@ -39,22 +39,22 @@ class SchemaTest(unittest.TestCase):
         "float": 0.25
     }
 
-    def getAvroSchema(self, cls, fieldName):
-        """
-        Returns the avro schema for the specified field.
-        """
-        field = None
-        for fld in cls.schema.fields:
-            if fld.name == fieldName:
-                field = fld
-        return field
+    # def getAvroSchema(self, cls, fieldName):
+    #     """
+    #     Returns the avro schema for the specified field.
+    #     """
+    #     field = None
+    #     for fld in cls.schema.fields:
+    #         if fld.name == fieldName:
+    #             field = fld
+    #     return field
 
-    def getInvalidValue(self, cls, fieldName):
-        """
-        Returns a value that should trigger a schema validation failure.
-        """
-        value = avrotools.Creator(cls).getInvalidField(fieldName)
-        return value
+    # def getInvalidValue(self, cls, fieldName):
+    #     """
+    #     Returns a value that should trigger a schema validation failure.
+    #     """
+    #     value = avrotools.Creator(cls).getInvalidField(fieldName)
+    #     return value
 
     def getTypicalValue(self, cls, fieldName):
         """
@@ -108,30 +108,30 @@ class SchemaTest(unittest.TestCase):
 
         return ret
 
-    def getTypicalInstance(self, cls):
-        """
-        Returns a typical instance of the specified protocol class.
-        """
-        tool = avrotools.Creator(cls)
-        instance = tool.getTypicalInstance()
-        return instance
+    # def getTypicalInstance(self, cls):
+    #     """
+    #     Returns a typical instance of the specified protocol class.
+    #     """
+    #     tool = avrotools.Creator(cls)
+    #     instance = tool.getTypicalInstance()
+    #     return instance
 
-    def getRandomInstance(self, cls):
-        """
-        Returns an instance of the specified class with randomly generated
-        values conforming to the schema.
-        """
-        tool = avrotools.Creator(cls)
-        instance = tool.getRandomInstance()
-        return instance
+    # def getRandomInstance(self, cls):
+    #     """
+    #     Returns an instance of the specified class with randomly generated
+    #     values conforming to the schema.
+    #     """
+    #     tool = avrotools.Creator(cls)
+    #     instance = tool.getRandomInstance()
+    #     return instance
 
-    def getDefaultInstance(self, cls):
-        """
-        Returns a new instance with the required values set.
-        """
-        tool = avrotools.Creator(cls)
-        instance = tool.getDefaultInstance()
-        return instance
+    # def getDefaultInstance(self, cls):
+    #     """
+    #     Returns a new instance with the required values set.
+    #     """
+    #     tool = avrotools.Creator(cls)
+    #     instance = tool.getDefaultInstance()
+    #     return instance
 
 
 class EqualityTest(SchemaTest):
@@ -319,7 +319,7 @@ class SearchResponseBuilderTest(SchemaTest):
                 for value in valueList:
                     builder.addValue(value)
                 builder.setNextPageToken(instance.nextPageToken)
-                otherInstance = class_.fromJsonString(builder.getJsonString())
+                otherInstance = class_.fromJsonString(builder.getSerializedResponse())
                 self.assertEqual(instance,  otherInstance)
 
     def testPageSizeOverflow(self):
@@ -335,7 +335,7 @@ class SearchResponseBuilderTest(SchemaTest):
             for listLength in range(1, 2 * pageSize):
                 builder.addValue(self.getTypicalInstance(valueClass))
                 instance = responseClass.fromJsonString(
-                    builder.getJsonString())
+                    builder.getSerializedResponse())
                 valueList = getattr(
                     instance, responseClass.getValueListName())
                 self.assertEqual(len(valueList), listLength)
@@ -353,7 +353,7 @@ class SearchResponseBuilderTest(SchemaTest):
             self.assertEqual(builder.getPageSize(), pageSize)
             while not builder.isFull():
                 builder.addValue(self.getTypicalInstance(valueClass))
-            instance = responseClass.fromJsonString(builder.getJsonString())
+            instance = responseClass.fromJsonString(builder.getSerializedResponse())
             valueList = getattr(instance, responseClass.getValueListName())
             self.assertEqual(len(valueList), pageSize)
 
@@ -370,7 +370,7 @@ class SearchResponseBuilderTest(SchemaTest):
                 maxResponseLength, builder.getMaxResponseLength())
             while not builder.isFull():
                 builder.addValue(typicalValue)
-            instance = responseClass.fromJsonString(builder.getJsonString())
+            instance = responseClass.fromJsonString(builder.getSerializedResponse())
             valueList = getattr(instance, responseClass.getValueListName())
             self.assertEqual(len(valueList), numValues)
 
@@ -380,11 +380,11 @@ class SearchResponseBuilderTest(SchemaTest):
             responseClass, 100, 2**32)
         # If not set, pageToken should be None
         self.assertIsNone(builder.getNextPageToken())
-        instance = responseClass.fromJsonString(builder.getJsonString())
+        instance = responseClass.fromJsonString(builder.getSerializedResponse())
         self.assertIsNone(instance.nextPageToken)
         # page tokens can be None or any string.
         for nextPageToken in [None, "", "string"]:
             builder.setNextPageToken(nextPageToken)
             self.assertEqual(nextPageToken, builder.getNextPageToken())
-            instance = responseClass.fromJsonString(builder.getJsonString())
+            instance = responseClass.fromJsonString(builder.getSerializedResponse())
             self.assertEqual(nextPageToken, instance.nextPageToken)

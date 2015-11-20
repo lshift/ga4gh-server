@@ -16,6 +16,7 @@ import ga4gh.protocol as protocol
 import ga4gh.exceptions as exceptions
 import ga4gh.datamodel as datamodel
 
+from proto.ga4gh.variants_pb2 import *  # NOQA
 
 def convertVCFPhaseset(vcfPhaseset):
     """
@@ -153,12 +154,15 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         """
         Converts this VariantSet into its GA4GH protocol equivalent.
         """
-        protocolElement = protocol.VariantSet()
+        protocolElement = VariantSet()
         protocolElement.id = self.getId()
-        protocolElement.datasetId = self.getParentContainer().getId()
-        protocolElement.referenceSetId = self._referenceSetId
-        protocolElement.metadata = self.getMetadata()
+        protocolElement.dataset_id = self.getParentContainer().getId()
         protocolElement.name = self.getLocalId()
+        # TODO fixme -- proto issues.
+        # protocolElement.referenceSetId = self._referenceSetId
+        for metadata in self.getMetadata():
+            newValue = protocolElement.metadata.add()
+            newValue.CopyFrom(metadata)
         return protocolElement
 
     def getNumVariants(self):
@@ -172,10 +176,10 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         Convenience method to set the common fields in a GA Variant
         object from this variant set.
         """
-        ret = protocol.Variant()
+        ret = Variant()
         ret.created = self._creationTime
         ret.updated = self._updatedTime
-        ret.variantSetId = self.getId()
+        ret.variant_set_id = self.getId()
         return ret
 
     def getVariantId(self, gaVariant):
@@ -185,7 +189,7 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         """
         md5 = self.hashVariant(gaVariant)
         compoundId = datamodel.VariantCompoundId(
-            self.getCompoundId(), gaVariant.referenceName,
+            self.getCompoundId(), gaVariant.reference_name,
             gaVariant.start, md5)
         return str(compoundId)
 
@@ -205,8 +209,8 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         identify it
         """
         return hashlib.md5(
-            gaVariant.referenceBases +
-            str(tuple(gaVariant.alternateBases))).hexdigest()
+            gaVariant.reference_bases +
+            str(tuple(gaVariant.alternate_bases))).hexdigest()
 
 
 class SimulatedVariantSet(AbstractVariantSet):
@@ -263,30 +267,27 @@ class SimulatedVariantSet(AbstractVariantSet):
         will always be produced regardless of the order it is generated in.
         """
         variant = self._createGaVariant()
-        variant.names = []
-        variant.referenceName = referenceName
+        variant.reference_name = referenceName
         variant.start = position
         variant.end = position + 1  # SNPs only for now
         bases = ["A", "C", "G", "T"]
         ref = randomNumberGenerator.choice(bases)
-        variant.referenceBases = ref
+        variant.reference_bases = ref
         alt = randomNumberGenerator.choice(
             [base for base in bases if base != ref])
-        variant.alternateBases = [alt]
-        variant.calls = []
+        variant.alternate_bases.append(alt)
         for callSet in self.getCallSets():
-            call = protocol.Call()
-            call.callSetId = callSet.getId()
+            call = variant.calls.add()
+            call.call_set_id = callSet.getId()
             # for now, the genotype is either [0,1], [1,1] or [1,0] with equal
             # probability; probably will want to do something more
             # sophisticated later.
             randomChoice = randomNumberGenerator.choice(
                 [[0, 1], [1, 0], [1, 1]])
-            call.genotype = randomChoice
+            call.genotype.extend(randomChoice)
             # TODO What is a reasonable model for generating these likelihoods?
             # Are these log-scaled? Spec does not say.
-            call.genotypeLikelihood = [-100, -100, -100]
-            variant.calls.append(call)
+            call.genotype_likelihood.extend([-100, -100, -100])
         variant.id = self.getVariantId(variant)
         return variant
 
@@ -378,19 +379,19 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
                 self._chromFileMap[chrom] = filename
         varFile.close()
 
-    def _convertGaCall(self, recordId, name, pysamCall, genotypeData):
+    def _convertGaCall(self, call, recordId, name, pysamCall, genotypeData):
         compoundId = self.getCallSetId(name)
         callSet = self.getCallSet(compoundId)
-        call = protocol.Call()
         call.callSetId = callSet.getId()
         call.callSetName = callSet.getSampleName()
-        call.sampleId = callSet.getSampleName()
+        # call.sampleId = callSet.getSampleName()
         # TODO:
-        # NOTE: THE FOLLOWING TWO LINES IS NOT THE INTENDED IMPLEMENTATION,
+        # NOTE: THE FOLLOWING THREE LINES IS NOT THE INTENDED IMPLEMENTATION,
         ###########################################
-        call.phaseset = None
-        call.genotype, call.phaseset = convertVCFGenotype(
-            genotypeData, call.phaseset)
+        genotype, phaseset = convertVCFGenotype(genotypeData, call.phaseset)
+        call.genotype.extend(genotype)
+        call.phaseset = phaseset
+
         ###########################################
 
         # THEY SHOULD BE REPLACED BY THE FOLLOWING, ONCE NEW PYSAM
@@ -402,13 +403,11 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
         # call.phaseset = pysamCall.phaseset
         ###########################################
 
-        call.genotypeLikelihood = []
         for key, value in pysamCall.iteritems():
             if key == 'GL' and value is not None:
-                call.genotypeLikelihood = list(value)
+                call.genotypeLikelihood.extend(list(value))
             elif key != 'GT':
                 call.info[key] = _encodeValue(value)
-        return call
 
     def convertVariant(self, record, callSetIds):
         """
@@ -419,30 +418,29 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
         variant = self._createGaVariant()
         variant.referenceName = record.contig
         if record.id is not None:
-            variant.names = record.id.split(';')
+            variant.names.extend(record.id.split(';'))
         variant.start = record.start          # 0-based inclusive
         variant.end = record.stop             # 0-based exclusive
         variant.referenceBases = record.ref
         if record.alts is not None:
-            variant.alternateBases = list(record.alts)
+            variant.alternateBases.extend(list(record.alts))
         # record.filter and record.qual are also available, when supported
         # by GAVariant.
         for key, value in record.info.iteritems():
             if value is not None:
-                variant.info[key] = _encodeValue(value)
+                variant.info[key].extend(_encodeValue(value))
 
         # NOTE: THE LABELED LINES SHOULD BE REMOVED ONCE PYSAM SUPPORTS
         # phaseset
 
         sampleData = record.__str__().split()[9:]  # REMOVAL
-        variant.calls = []
         sampleIterator = 0  # REMOVAL
         for name, call in record.samples.iteritems():
             if self.getCallSetId(name) in callSetIds:
                 genotypeData = sampleData[sampleIterator].split(
                     ":")[0]  # REMOVAL
-                variant.calls.append(self._convertGaCall(
-                    record.id, name, call, genotypeData))  # REPLACE
+                gaCall = variant.calls.add()
+                self._convertGaCall(gaCall, record.id, name, call, genotypeData)  # REPLACE
             sampleIterator += 1  # REMOVAL
         variant.id = self.getVariantId(variant)
         return variant

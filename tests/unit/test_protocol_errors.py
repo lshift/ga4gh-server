@@ -10,7 +10,7 @@ import unittest
 import ga4gh.frontend as frontend
 import ga4gh.exceptions as exceptions
 import ga4gh.protocol as protocol
-import ga4gh.avrotools as avrotools
+# import ga4gh.avrotools as avrotools
 
 
 class TestFrontendErrors(unittest.TestCase):
@@ -45,13 +45,13 @@ class TestFrontendErrors(unittest.TestCase):
             if requestClass in supportedMethods:
                 self.endPointMap[endPoint] = requestClass
 
-    def _createInstance(self, requestClass):
-        """
-        Returns a valid instance of the specified class.
-        """
-        creator = avrotools.Creator(requestClass)
-        instance = creator.getTypicalInstance()
-        return instance
+    # def _createInstance(self, requestClass):
+    #     """
+    #     Returns a valid instance of the specified class.
+    #     """
+    #     creator = avrotools.Creator(requestClass)
+    #     instance = creator.getTypicalInstance()
+    #     return instance
 
     def assertRawRequestRaises(self, exceptionClass, url, requestString):
         """
@@ -76,23 +76,23 @@ class TestFrontendErrors(unittest.TestCase):
         self.assertRawRequestRaises(
             exceptionClass, url, request.toJsonString())
 
-    def testPageSize(self):
-        for url, requestClass in self.endPointMap.items():
-            for badType in ["", "1", "None", 0.0, 1e3]:
-                request = self._createInstance(requestClass)
-                request.pageSize = badType
-                self.assertRequestRaises(
-                    exceptions.RequestValidationFailureException, url, request)
-            for badSize in [-100, -1, 0]:
-                request = self._createInstance(requestClass)
-                request.pageSize = badSize
-                self.assertRequestRaises(
-                    exceptions.BadPageSizeException, url, request)
-
-    def testPageToken(self):
-        for url, requestClass in self.endPointMap.items():
-            for badType in [0, 0.0, 1e-3, {}, [], [None]]:
-                request = self._createInstance(requestClass)
-                request.pageToken = badType
-                self.assertRequestRaises(
-                    exceptions.RequestValidationFailureException, url, request)
+    # def testPageSize(self):
+    #     for url, requestClass in self.endPointMap.items():
+    #         for badType in ["", "1", "None", 0.0, 1e3]:
+    #             request = self._createInstance(requestClass)
+    #             request.pageSize = badType
+    #             self.assertRequestRaises(
+    #                 exceptions.RequestValidationFailureException, url, request)
+    #         for badSize in [-100, -1, 0]:
+    #             request = self._createInstance(requestClass)
+    #             request.pageSize = badSize
+    #             self.assertRequestRaises(
+    #                 exceptions.BadPageSizeException, url, request)
+    #
+    # def testPageToken(self):
+    #     for url, requestClass in self.endPointMap.items():
+    #         for badType in [0, 0.0, 1e-3, {}, [], [None]]:
+    #             request = self._createInstance(requestClass)
+    #             request.pageToken = badType
+    #             self.assertRequestRaises(
+    #                 exceptions.RequestValidationFailureException, url, request)

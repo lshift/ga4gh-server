@@ -15,6 +15,8 @@ import ga4gh.datamodel.references as references
 import ga4gh.exceptions as exceptions
 import ga4gh.protocol as protocol
 
+from proto.ga4gh.common_pb2 import *  # NOQA
+from proto.ga4gh.reads_pb2 import *  # NOQA
 
 def parseMalformedBamHeader(headerDict):
     """
@@ -39,15 +41,16 @@ class SamCigar(object):
     # see http://pysam.readthedocs.org/en/latest/api.html
     # #pysam.AlignedSegment.cigartuples
     cigarStrings = [
-        protocol.CigarOperation.ALIGNMENT_MATCH,
-        protocol.CigarOperation.INSERT,
-        protocol.CigarOperation.DELETE,
-        protocol.CigarOperation.SKIP,
-        protocol.CigarOperation.CLIP_SOFT,
-        protocol.CigarOperation.CLIP_HARD,
-        protocol.CigarOperation.PAD,
-        protocol.CigarOperation.SEQUENCE_MATCH,
-        protocol.CigarOperation.SEQUENCE_MISMATCH,
+        # FIXME proto issues here.
+        # protocol.CigarOperation.ALIGNMENT_MATCH,
+        # protocol.CigarOperation.INSERT,
+        # protocol.CigarOperation.DELETE,
+        # protocol.CigarOperation.SKIP,
+        # protocol.CigarOperation.CLIP_SOFT,
+        # protocol.CigarOperation.CLIP_HARD,
+        # protocol.CigarOperation.PAD,
+        # protocol.CigarOperation.SEQUENCE_MATCH,
+        # protocol.CigarOperation.SEQUENCE_MISMATCH,
     ]
 
     @classmethod
@@ -439,29 +442,22 @@ class SimulatedReadGroup(AbstractReadGroup):
 
     def _createReadAlignment(self, i):
         # TODO fill out a bit more
-        alignment = protocol.ReadAlignment()
-        alignment.alignedQuality = [1, 2, 3]
-        alignment.alignedSequence = "ACT"
-        alignment.fragmentId = 'TODO'
-        gaPosition = protocol.Position()
+        alignment = ReadAlignment()
+        alignment.aligned_quality.extend([1, 2, 3])
+        alignment.aligned_sequence = "ACT"
+        alignment.fragment_id = 'TODO'
+        gaPosition = alignment.alignment.position
         gaPosition.position = 0
-        gaPosition.referenceName = "NotImplemented"
-        gaPosition.strand = protocol.Strand.POS_STRAND
-        gaLinearAlignment = protocol.LinearAlignment()
-        gaLinearAlignment.position = gaPosition
-        alignment.alignment = gaLinearAlignment
-        alignment.duplicateFragment = False
-        alignment.failedVendorQualityChecks = False
-        alignment.fragmentLength = 3
-        alignment.fragmentName = "simulated{}".format(i)
-        alignment.info = {}
-        alignment.nextMatePosition = None
-        alignment.numberReads = None
-        alignment.properPlacement = False
-        alignment.readGroupId = self.getId()
-        alignment.readNumber = None
-        alignment.secondaryAlignment = False
-        alignment.supplementaryAlignment = False
+        gaPosition.reference_name = "NotImplemented"
+        gaPosition.strand = POS_STRAND
+        alignment.duplicate_fragment = False
+        alignment.failed_vendor_quality_checks = False
+        alignment.fragment_length = 3
+        alignment.fragment_name = "simulated{}".format(i)
+        alignment.proper_placement = False
+        alignment.read_group_id = self.getId()
+        alignment.secondary_alignment = False
+        alignment.supplementary_alignment = False
         alignment.id = self.getReadAlignmentId(alignment)
         return alignment
 
