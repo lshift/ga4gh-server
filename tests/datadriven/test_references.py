@@ -83,12 +83,13 @@ class ReferenceSetTest(datadriven.DataDrivenTest):
         # test that validation works on reference sets and references
         referenceSet = self._gaObject
         referenceSetPe = referenceSet.toProtocolElement()
-        self.assertValid(
-            protocol.ReferenceSet, referenceSetPe.toJsonDict())
-        self.assertGreater(len(referenceSetPe.referenceIds), 0)
+        self.assertIsInstance(
+            referenceSetPe, protocol.ReferenceSet)
+        self.assertGreater(len(referenceSetPe.reference_ids), 0)
         for gaReference in referenceSet.getReferences():
-            reference = gaReference.toProtocolElement().toJsonDict()
-            self.assertValid(protocol.Reference, reference)
+            self.assertIsInstance(
+                gaReference.toProtocolElement(),
+                protocol.Reference)
 
     def testMetadata(self):
         # Check that the metadata loaded from the JSON file is

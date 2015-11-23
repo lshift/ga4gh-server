@@ -68,12 +68,12 @@ class IntervalIterator(object):
         self._nextObject = None
         self._searchAnchor = None
         self._distanceFromAnchor = None
-        if request.pageToken is '':
+        if not request.page_token:
             self._initialiseIteration()
         else:
             # Set the search start point and the number of records to skip from
             # the page token.
-            searchAnchor, objectsToSkip = _parsePageToken(request.pageToken, 2)
+            searchAnchor, objectsToSkip = _parsePageToken(request.page_token, 2)
             self._pickUpIteration(searchAnchor, objectsToSkip)
 
     def _initialiseIteration(self):
@@ -180,8 +180,8 @@ class VariantsIntervalIterator(IntervalIterator):
 
     def _search(self, start, end):
         return self._parentContainer.getVariants(
-            self._request.referenceName, start, end,
-            self._request.callSetIds)
+            self._request.reference_name, start, end,
+            self._request.call_set_ids)
 
     @classmethod
     def _getStart(cls, variant):
@@ -345,17 +345,6 @@ class AbstractBackend(object):
                 raise exceptions.RequestValidationFailureException(
                     jsonDict, requestClass)
 
-    # def validateResponse(self, jsonString, responseClass):
-    #     """
-    #     Ensures the jsonDict corresponds to a valid instance of responseClass
-    #     Throws an error if the data is invalid
-    #     """
-    #     if self._responseValidation:
-    #         jsonDict = json.loads(jsonString)
-    #         if not responseClass.validate(jsonDict):
-    #             raise exceptions.ResponseValidationFailureException(
-    #                 jsonDict, responseClass)
-
     ###########################################################
     #
     # Iterators over the data hierarchy. These methods help to
@@ -374,8 +363,8 @@ class AbstractBackend(object):
         up at any point.
         """
         currentIndex = 0
-        if request.pageToken is not '':
-            currentIndex, = _parsePageToken(request.pageToken, 1)
+        if request.page_token:
+            currentIndex, = _parsePageToken(request.page_token, 1)
         while currentIndex < numObjects:
             object_ = getByIndexMethod(currentIndex)
             currentIndex += 1
@@ -418,8 +407,8 @@ class AbstractBackend(object):
         Returns a generator over the (readGroupSet, nextPageToken) pairs
         defined by the specified request.
         """
-        dataset = self.getDataset(request.datasetId)
-        if request.name is None:
+        dataset = self.getDataset(request.dataset_id)
+        if not request.name:
             return self._topLevelObjectGenerator(
                 request, dataset.getNumReadGroupSets(),
                 dataset.getReadGroupSetByIndex)
@@ -438,14 +427,14 @@ class AbstractBackend(object):
         results = []
         for obj in self.getReferenceSets():
             include = True
-            if request.md5checksum is not None:
+            if request.md5checksum:
                 if request.md5checksum != obj.getMd5Checksum():
                     include = False
-            if request.accession is not None:
+            if request.accession:
                 if request.accession not in obj.getSourceAccessions():
                     include = False
-            if request.assemblyId is not None:
-                if request.assemblyId != obj.getAssemblyId():
+            if request.assembly_id:
+                if request.assembly_id != obj.getAssemblyId():
                     include = False
             if include:
                 results.append(obj)
@@ -456,14 +445,14 @@ class AbstractBackend(object):
         Returns a generator over the (reference, nextPageToken) pairs
         defined by the specified request.
         """
-        referenceSet = self.getReferenceSet(request.referenceSetId)
+        referenceSet = self.getReferenceSet(request.reference_set_id)
         results = []
         for obj in referenceSet.getReferences():
             include = True
-            if request.md5checksum is not None:
+            if request.md5checksum:
                 if request.md5checksum != obj.getMd5Checksum():
                     include = False
-            if request.accession is not None:
+            if request.accession:
                 if request.accession not in obj.getSourceAccessions():
                     include = False
             if include:
@@ -475,7 +464,7 @@ class AbstractBackend(object):
         Returns a generator over the (variantSet, nextPageToken) pairs defined
         by the specified request.
         """
-        dataset = self.getDataset(request.datasetId)
+        dataset = self.getDataset(request.dataset_id)
         return self._topLevelObjectGenerator(
             request, dataset.getNumVariantSets(),
             dataset.getVariantSetByIndex)
@@ -485,19 +474,19 @@ class AbstractBackend(object):
         Returns a generator over the (read, nextPageToken) pairs defined
         by the specified request
         """
-        if request.referenceId is None:
+        if not request.reference_id:
             raise exceptions.UnmappedReadsNotSupported()
-        if len(request.readGroupIds) != 1:
+        if len(request.read_group_ids) != 1:
             raise exceptions.NotImplementedException(
                 "Exactly one read group id must be specified")
         compoundId = datamodel.ReadGroupCompoundId.parse(
-            request.readGroupIds[0])
+            request.read_group_ids[0])
         dataset = self.getDataset(compoundId.datasetId)
         readGroupSet = dataset.getReadGroupSet(compoundId.readGroupSetId)
         readGroup = readGroupSet.getReadGroup(compoundId.readGroupId)
         # Find the reference.
         referenceSet = readGroupSet.getReferenceSet()
-        reference = referenceSet.getReference(request.referenceId)
+        reference = referenceSet.getReference(request.reference_id)
         intervalIterator = ReadsIntervalIterator(request, readGroup, reference)
         return intervalIterator
 
@@ -506,7 +495,7 @@ class AbstractBackend(object):
         Returns a generator over the (variant, nextPageToken) pairs defined
         by the specified request.
         """
-        compoundId = datamodel.VariantSetCompoundId.parse(request.variantSetId)
+        compoundId = datamodel.VariantSetCompoundId.parse(request.variant_set_id)
         dataset = self.getDataset(compoundId.datasetId)
         variantSet = dataset.getVariantSet(compoundId.variantSetId)
         intervalIterator = VariantsIntervalIterator(request, variantSet)
@@ -517,7 +506,7 @@ class AbstractBackend(object):
         Returns a generator over the (callSet, nextPageToken) pairs defined
         by the specified request.
         """
-        compoundId = datamodel.VariantSetCompoundId.parse(request.variantSetId)
+        compoundId = datamodel.VariantSetCompoundId.parse(request.variant_set_id)
         dataset = self.getDataset(compoundId.datasetId)
         variantSet = dataset.getVariantSet(compoundId.variantSetId)
         if request.name is None:
@@ -561,10 +550,9 @@ class AbstractBackend(object):
         """
         self.startProfile()
         request = protocol.fromJson(requestStr, requestClass)
-        # TODO How do we detect when the page size is not set?
-        # Proto3 doesn't support HasField any more for some reason
-        if request.page_size <= 0:
-            raise exceptions.BadPageSizeException(request.page_size)
+        # # TODO How do we detect when the page size is not set?
+        # if request.page_size <= 0:
+        #     raise exceptions.BadPageSizeException(request.page_size)
         responseBuilder = protocol.SearchResponseBuilder(
             responseClass, request.page_size, self._maxResponseLength)
         nextPageToken = None
@@ -574,7 +562,6 @@ class AbstractBackend(object):
                 break
         responseBuilder.setNextPageToken(nextPageToken)
         responseString = responseBuilder.getSerializedResponse()
-        self.validateResponse(responseString, responseClass)
         self.endProfile()
         return responseString
 

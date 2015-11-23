@@ -152,10 +152,10 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
             gaReadGroup = readGroup.toProtocolElement()
             self.assertEqual(
                 readGroupInfo.sampleId,
-                gaReadGroup.sampleId)
+                gaReadGroup.sample_id)
             self.assertEqual(
                 readGroupInfo.predictedInsertSize,
-                gaReadGroup.predictedInsertSize)
+                gaReadGroup.predicted_insert_size)
             self.assertEqual(
                 readGroupInfo.description,
                 gaReadGroup.description)
@@ -200,11 +200,11 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
                 self.assertEqual(
                     gaProgram.id, htslibProgram.get('ID'))
                 self.assertEqual(
-                    gaProgram.commandLine, htslibProgram.get('CL', None))
+                    gaProgram.command_line, htslibProgram.get('CL', None))
                 self.assertEqual(
                     gaProgram.name, htslibProgram.get('PN', None))
                 self.assertEqual(
-                    gaProgram.prevProgramId, htslibProgram.get('PP', None))
+                    gaProgram.prev_program_id, htslibProgram.get('PP', None))
                 self.assertEqual(
                     gaProgram.version, htslibProgram.get('VN', None))
 
@@ -220,10 +220,10 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
             readGroupSet.getNumUnalignedReads(),
             readGroupSetInfo.numUnalignedReads)
         self.assertEqual(
-            gaReadGroupSet.stats.alignedReadCount,
+            gaReadGroupSet.stats.aligned_read_count,
             readGroupSetInfo.numAlignedReads)
         self.assertEqual(
-            gaReadGroupSet.stats.unalignedReadCount,
+            gaReadGroupSet.stats.unaligned_read_count,
             readGroupSetInfo.numUnalignedReads)
         for readGroup in readGroupSet.getReadGroups():
             gaReadGroup = readGroup.toProtocolElement()
@@ -232,22 +232,20 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
             self.assertEqual(
                 readGroup.getNumUnalignedReads(), -1)
             self.assertEqual(
-                gaReadGroup.stats.alignedReadCount, -1)
+                gaReadGroup.stats.aligned_read_count, -1)
             self.assertEqual(
-                gaReadGroup.stats.unalignedReadCount, -1)
+                gaReadGroup.stats.unaligned_read_count, -1)
 
     def testValidateObjects(self):
         # test that validation works on read groups and reads
         readGroupSet = self._gaObject
         for readGroup in readGroupSet.getReadGroups():
-            self.assertValid(
-                protocol.ReadGroup,
-                readGroup.toProtocolElement().toJsonDict())
+            self.assertIsInstance(
+                readGroup.toProtocolElement(), protocol.ReadGroup)
             for reference in self._referenceSet.getReferences():
                 for gaAlignment in readGroup.getReadAlignments(reference):
-                    self.assertValid(
-                        protocol.ReadAlignment,
-                        gaAlignment.toJsonDict())
+                    self.assertIsInstance(
+                        gaAlignment, protocol.ReadAlignment)
 
     def testGetReadAlignmentsRefId(self):
         # test that searching with a reference id succeeds

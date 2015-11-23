@@ -259,23 +259,22 @@ class DataDrivenTest(TestCase):
         """
         raise NotImplementedError()
 
-    def assertValid(self, protocolClass, jsonDict):
-        """
-        Asserts that the specified JSON dictionary is a valid instance
-        of the specified protocol class.
-        """
-        if not protocolClass.validate(jsonDict):
-            # validator = avrotools.Validator(protocolClass)
-            # invalidFields = validator.getInvalidFields(jsonDict)
-            message = (
-                "{} is not a valid instance of {}. "
-                "Invalid fields = {}".format(
-                    jsonDict, protocolClass
-                    # , invalidFields
-                ))
-            assert False, message
+    # def assertValid(self, protocolClass, jsonDict):
+    #     """
+    #     Asserts that the specified JSON dictionary is a valid instance
+    #     of the specified protocol class.
+    #     """
+    #     if not protocolClass.validate(jsonDict):
+    #         # validator = avrotools.Validator(protocolClass)
+    #         # invalidFields = validator.getInvalidFields(jsonDict)
+    #         message = (
+    #             "{} is not a valid instance of {}. "
+    #             "Invalid fields = {}".format(
+    #                 jsonDict, protocolClass
+    #                 # , invalidFields
+    #             ))
+    #         assert False, message
 
     def testProtocolElementValid(self):
-        self.assertValid(
-            self.getProtocolClass(),
-            self._gaObject.toProtocolElement().toJsonDict())
+        self.assertIsInstance(
+            self._gaObject.toProtocolElement(), self.getProtocolClass())

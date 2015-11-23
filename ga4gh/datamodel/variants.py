@@ -13,6 +13,7 @@ import hashlib
 import pysam
 
 import ga4gh.protocol as protocol
+import ga4gh.pb as pb
 import ga4gh.exceptions as exceptions
 import ga4gh.datamodel as datamodel
 
@@ -382,15 +383,15 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
     def _convertGaCall(self, call, recordId, name, pysamCall, genotypeData):
         compoundId = self.getCallSetId(name)
         callSet = self.getCallSet(compoundId)
-        call.callSetId = callSet.getId()
-        call.callSetName = callSet.getSampleName()
+        call.call_set_id = callSet.getId()
+        call.call_set_name = callSet.getSampleName()
         # call.sampleId = callSet.getSampleName()
         # TODO:
         # NOTE: THE FOLLOWING THREE LINES IS NOT THE INTENDED IMPLEMENTATION,
         ###########################################
         genotype, phaseset = convertVCFGenotype(genotypeData, call.phaseset)
         call.genotype.extend(genotype)
-        call.phaseset = phaseset
+        call.phaseset = pb.string(phaseset)
 
         ###########################################
 
@@ -416,14 +417,14 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
         be included.
         """
         variant = self._createGaVariant()
-        variant.referenceName = record.contig
+        variant.reference_name = record.contig
         if record.id is not None:
             variant.names.extend(record.id.split(';'))
         variant.start = record.start          # 0-based inclusive
         variant.end = record.stop             # 0-based exclusive
-        variant.referenceBases = record.ref
+        variant.reference_bases = record.ref
         if record.alts is not None:
-            variant.alternateBases.extend(list(record.alts))
+            variant.alternate_bases.extend(list(record.alts))
         # record.filter and record.qual are also available, when supported
         # by GAVariant.
         for key, value in record.info.iteritems():

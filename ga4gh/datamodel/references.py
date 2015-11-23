@@ -15,6 +15,7 @@ import pysam
 
 import ga4gh.datamodel as datamodel
 import ga4gh.protocol as protocol
+import ga4gh.pb as pb
 import ga4gh.exceptions as exceptions
 
 
@@ -161,8 +162,8 @@ class AbstractReferenceSet(datamodel.DatamodelObject):
         ret.is_derived = self.getIsDerived()
         ret.md5checksum = self.getMd5Checksum()
         ret.ncbi_taxon_id = self.getNcbiTaxonId()
-        ret.reference_ids = self._referenceIds
-        ret.source_accessions = self.getSourceAccessions()
+        ret.reference_ids.extend(self._referenceIds)
+        ret.source_accessions.extend(self.getSourceAccessions())
         ret.source_uri = self.getSourceUri()
         ret.name = self.getLocalId()
         return ret
@@ -259,14 +260,14 @@ class AbstractReference(datamodel.DatamodelObject):
         """
         reference = protocol.Reference()
         reference.id = self.getId()
-        reference.isDerived = self.getIsDerived()
+        reference.is_derived = self.getIsDerived()
         reference.length = self.getLength()
         reference.md5checksum = self.getMd5Checksum()
         reference.name = self.getName()
-        reference.ncbiTaxonId = self.getNcbiTaxonId()
-        reference.sourceAccessions = self.getSourceAccessions()
-        reference.sourceDivergence = self.getSourceDivergence()
-        reference.sourceURI = self.getSourceUri()
+        reference.ncbi_taxon_id = self.getNcbiTaxonId()
+        reference.source_accessions.extend(self.getSourceAccessions())
+        reference.source_divergence = pb.int(self.getSourceDivergence())
+        reference.source_uri = self.getSourceUri()
         return reference
 
     def checkQueryRange(self, start, end):

@@ -15,6 +15,7 @@ import unittest.suite
 
 import requests
 
+import ga4gh.protocol as protocol
 import ga4gh.backend as backend
 import ga4gh.client as client
 import ga4gh.converters as converters
@@ -133,7 +134,7 @@ class FormattedOutputRunner(AbstractQueryRunner):
         line.
         """
         for gaObject in gaObjects:
-            print(gaObject.toJsonString())
+            print(protocol.toJson(gaObject))
 
     def _textOutput(self, gaObjects):
         """
@@ -201,7 +202,7 @@ class AbstractSearchRunner(FormattedOutputRunner):
                 datasetId=dataset.id)
             for readGroupSet in iterator:
                 readGroupSet = self._client.getReadGroupSet(readGroupSet.id)
-                for readGroup in readGroupSet.readGroups:
+                for readGroup in readGroupSet.read_groups:
                     yield readGroup.id
 
     def getAllReferenceSets(self):
@@ -406,7 +407,7 @@ class SearchReadsRunner(AbstractSearchRunner):
             referenceId = self._referenceId
         if referenceId is None:
             rg = self._client.getReadGroup(readGroupId=referenceGroupId)
-            iterator = self._client.searchReferences(rg.referenceSetId)
+            iterator = self._client.searchReferences(rg.reference_set_id)
             for reference in iterator:
                 self._run(referenceGroupId, reference.id)
         else:

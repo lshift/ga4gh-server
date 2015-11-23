@@ -44,7 +44,7 @@ class TestVariantsGenerator(unittest.TestCase):
         # a request for a variant set that doesn't exist should throw an error
         variantSet = variants.AbstractVariantSet(
             self.dataset, 'notFound')
-        self.request.variantSetId = variantSet.getId()
+        self.request.variant_set_id = variantSet.getId()
         with self.assertRaises(exceptions.VariantSetNotFoundException):
             self.backend.variantsGenerator(self.request)
 
@@ -80,15 +80,13 @@ class TestVariantsGenerator(unittest.TestCase):
         variantSet = MockVariantSet(
             self.dataset, "mockvs", numVariants)
         self.dataset.addVariantSet(variantSet)
-        self.request.variantSetId = variantSet.getId()
+        self.request.variant_set_id = variantSet.getId()
 
 
 def generateReadAlignment(position=0, sequence='abc'):
     alignment = protocol.ReadAlignment()
-    alignment.alignment = protocol.LinearAlignment()
-    alignment.alignment.position = protocol.Position()
     alignment.alignment.position.position = position
-    alignment.alignedSequence = sequence
+    alignment.aligned_sequence = sequence
     return alignment
 
 
@@ -113,26 +111,25 @@ class TestReadsGenerator(unittest.TestCase):
         self.backend = backend.SimulatedBackend(numAlignments=0)
         referenceSet = self.backend.getReferenceSetByIndex(0)
         reference = referenceSet.getReferenceByIndex(0)
-        self.request.referenceId = reference.getId()
+        self.request.reference_id = reference.getId()
         self.dataset = self.backend.getDatasets()[0]
         self.readGroupSet = self.dataset.getReadGroupSets()[0]
 
     def testNoReadGroupsNotSupported(self):
         # a request for no read groups should throw an exception
-        self.request.readGroupIds = []
         with self.assertRaises(exceptions.NotImplementedException):
             self.backend.readsGenerator(self.request)
 
     def testMultipleReadGroupsNotSupported(self):
         # a request for multiple read groups should throw an exception
-        self.request.readGroupIds = ["1", "2"]
+        self.request.read_group_ids.extend(["1", "2"])
         with self.assertRaises(exceptions.NotImplementedException):
             self.backend.readsGenerator(self.request)
 
     def testNonexistantReadGroup(self):
         # a request for a readGroup that doesn't exist should throw an error
         readGroup = reads.AbstractReadGroup(self.readGroupSet, 'notFound')
-        self.request.readGroupIds = [readGroup.getId()]
+        self.request.read_group_ids.extend([readGroup.getId()])
         with self.assertRaises(exceptions.ReadGroupNotFoundException):
             self.backend.readsGenerator(self.request)
 
@@ -168,7 +165,7 @@ class TestReadsGenerator(unittest.TestCase):
         readGroup = MockReadGroup(
             self.readGroupSet, "mockrg", numAlignments)
         self.readGroupSet.addReadGroup(readGroup)
-        self.request.readGroupIds = [readGroup.getId()]
+        self.request.read_group_ids.extend([readGroup.getId()])
 
 
 class TestVariantsIntervalIteratorClassMethods(unittest.TestCase):

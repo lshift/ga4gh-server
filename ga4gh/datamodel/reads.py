@@ -133,14 +133,15 @@ class AbstractReadGroupSet(datamodel.DatamodelObject):
         """
         readGroupSet = protocol.ReadGroupSet()
         readGroupSet.id = self.getId()
-        readGroupSet.readGroups = [
+        readGroupSet.read_groups.extend([
             readGroup.toProtocolElement()
-            for readGroup in self.getReadGroups()]
+                for readGroup in self.getReadGroups()
+            ])
         readGroupSet.name = self.getLocalId()
-        readGroupSet.datasetId = self.getParentContainer().getId()
+        readGroupSet.dataset_id = self.getParentContainer().getId()
         stats = readGroupSet.stats
-        stats.alignedReadCount = pb.int(self.getNumAlignedReads())
-        stats.unalignedReadCount = pb.int(self.getNumUnalignedReads())
+        stats.aligned_read_count = pb.int(self.getNumAlignedReads())
+        stats.unaligned_read_count = pb.int(self.getNumUnalignedReads())
         return readGroupSet
 
     def getNumAlignedReads(self):
@@ -301,22 +302,22 @@ class AbstractReadGroup(datamodel.DatamodelObject):
         dataset = self.getParentContainer().getParentContainer()
         readGroup.dataset_id = dataset.getId()
         readGroup.name = self.getLocalId()
-        readGroup.predicted_insert_size = self.getPredictedInsertSize()
+        readGroup.predicted_insert_size = pb.int(self.getPredictedInsertSize())
         referenceSet = self._parentContainer.getReferenceSet()
-        readGroup.sample_id = self.getSampleId()
+        readGroup.sample_id = pb.string(self.getSampleId())
         if referenceSet is not None:
             readGroup.reference_set_id = referenceSet.getId()
         stats = readGroup.stats
         stats.aligned_read_count = self.getNumAlignedReads()
         stats.unaligned_read_count = self.getNumUnalignedReads()
         readGroup.programs.extend(self.getPrograms())
-        readGroup.description = self.getDescription()
+        readGroup.description = pb.string(self.getDescription())
         experiment = readGroup.experiment
         experiment.id = self.getExperimentId()
-        experiment.instrument_model = self.getInstrumentModel()
-        experiment.sequencing_center = self.getSequencingCenter()
-        experiment.description = self.getExperimentDescription()
-        experiment.library = self.getLibrary()
+        experiment.instrument_model = pb.string(self.getInstrumentModel())
+        experiment.sequencing_center = pb.string(self.getSequencingCenter())
+        experiment.description = pb.string(self.getExperimentDescription())
+        experiment.library = pb.string(self.getLibrary())
         experiment.platform_unit = pb.string(self.getPlatformUnit())
         experiment.message_create_time = self._iso8601
         experiment.message_update_time = self._iso8601

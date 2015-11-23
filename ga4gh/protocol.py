@@ -9,7 +9,10 @@ import datetime
 
 import google.protobuf.json_format as json_format
 
+import ga4gh.pb as pb
+
 from proto.ga4gh.common_pb2 import *
+from proto.ga4gh.metadata_pb2 import *
 from proto.ga4gh.read_service_pb2 import *
 from proto.ga4gh.reads_pb2 import *
 from proto.ga4gh.reference_service_pb2 import *
@@ -22,6 +25,11 @@ from proto.ga4gh.variants_pb2 import *
 _valueListNameMap = {
     SearchVariantSetsResponse: "variant_sets",
     SearchVariantsResponse: "variants",
+    SearchDatasetsResponse: "datasets",
+    SearchReferenceSetsResponse: "reference_sets",
+    SearchReferencesResponse: "references",
+    SearchReadGroupSetsResponse: "read_group_sets",
+    SearchReadsResponse: "alignments",
 }
 
 
@@ -122,19 +130,21 @@ class SearchResponseBuilder(object):
         The buffer is full if either (1) the number of items in the value
         list is >= pageSize or (2) the total length of the serialised
         elements in the page is >= maxResponseLength.
+
+        If page_size or max_response_length were not set in the request
+        then they're not checked.
         """
         return (
-            self._numElements >= self._pageSize or
-            self._protoObject.ByteSize() >= self._maxResponseLength)
+            (self._pageSize > 0 and self._numElements >= self._pageSize) or
+            (self._maxResponseLength > 0 and
+             self._protoObject.ByteSize() >= self._maxResponseLength)
+        )
 
     def getSerializedResponse(self):
         """
         Returns a string version of the SearchResponse that has
         been built by this SearchResponseBuilder.
         """
-        if self._next_page_token is None:
-            self._next_page_token = ""
-        self._protoObject.next_page_token = self._next_page_token
-        # s = self._protoObject.SerializeToString()
+        self._protoObject.next_page_token = pb.string(self._nextPageToken)
         s = toJson(self._protoObject)
         return s

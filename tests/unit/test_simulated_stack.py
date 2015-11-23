@@ -93,7 +93,7 @@ class TestSimulatedStack(unittest.TestCase):
         response = self.sendObjectGetRequest(path, id_)
         self.assertEqual(200, response.status_code)
         obj = protocol.fromJson(response.data, responseClass)
-        self.assertTrue(responseClass.validate(obj.toJsonDict()))
+        self.assertIsInstance(obj, responseClass)
         return obj
 
     def sendListReferenceBasesRequest(self, id_, request):
@@ -106,7 +106,7 @@ class TestSimulatedStack(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         obj = protocol.fromJson(
             response.data, protocol.ListReferenceBasesResponse)
-        self.assertTrue(obj.validate(obj.toJsonDict()))
+        self.assertIsInstance(obj, protocol.ListReferenceBasesResponse)
         return obj
 
     def verifyVariantSetsEqual(self, gaVariantSet, variantSet):
