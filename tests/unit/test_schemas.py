@@ -203,8 +203,8 @@ class SerialisationTest(SchemaTest):
     def validateClasses(self, factory):
         for cls in protocol.getProtocolClasses():
             instance = factory(cls)
-            jsonStr = instance.toJsonString()
-            otherInstance = cls.fromJsonString(jsonStr)
+            jsonStr = protocol.toJson(instance)
+            otherInstance = protocol.fromJson(jsonStr, cls)
             self.assertEqual(instance, otherInstance)
 
             jsonDict = instance.toJsonDict()
@@ -319,7 +319,8 @@ class SearchResponseBuilderTest(SchemaTest):
                 for value in valueList:
                     builder.addValue(value)
                 builder.setNextPageToken(instance.nextPageToken)
-                otherInstance = class_.fromJsonString(builder.getSerializedResponse())
+                otherInstance = protocol.fromJson(
+                    builder.getSerializedResponse(), class_)
                 self.assertEqual(instance,  otherInstance)
 
     def testPageSizeOverflow(self):
@@ -334,8 +335,8 @@ class SearchResponseBuilderTest(SchemaTest):
             self.assertFalse(builder.isFull())
             for listLength in range(1, 2 * pageSize):
                 builder.addValue(self.getTypicalInstance(valueClass))
-                instance = responseClass.fromJsonString(
-                    builder.getSerializedResponse())
+                instance = protocol.fromJson(
+                    builder.getSerializedResponse(), responseClass)
                 valueList = getattr(
                     instance, responseClass.getValueListName())
                 self.assertEqual(len(valueList), listLength)
@@ -353,7 +354,8 @@ class SearchResponseBuilderTest(SchemaTest):
             self.assertEqual(builder.getPageSize(), pageSize)
             while not builder.isFull():
                 builder.addValue(self.getTypicalInstance(valueClass))
-            instance = responseClass.fromJsonString(builder.getSerializedResponse())
+            instance = protocol.fromJson(
+                builder.getSerializedResponse(), responseClass)
             valueList = getattr(instance, responseClass.getValueListName())
             self.assertEqual(len(valueList), pageSize)
 
@@ -370,7 +372,8 @@ class SearchResponseBuilderTest(SchemaTest):
                 maxResponseLength, builder.getMaxResponseLength())
             while not builder.isFull():
                 builder.addValue(typicalValue)
-            instance = responseClass.fromJsonString(builder.getSerializedResponse())
+            instance = protocol.fromJson(
+                builder.getSerializedResponse(), responseClass)
             valueList = getattr(instance, responseClass.getValueListName())
             self.assertEqual(len(valueList), numValues)
 
@@ -380,11 +383,13 @@ class SearchResponseBuilderTest(SchemaTest):
             responseClass, 100, 2**32)
         # If not set, pageToken should be None
         self.assertIsNone(builder.getNextPageToken())
-        instance = responseClass.fromJsonString(builder.getSerializedResponse())
+        instance = protocol.fromJson(
+            builder.getSerializedResponse(), responseClass)
         self.assertIsNone(instance.nextPageToken)
         # page tokens can be None or any string.
         for nextPageToken in [None, "", "string"]:
             builder.setNextPageToken(nextPageToken)
             self.assertEqual(nextPageToken, builder.getNextPageToken())
-            instance = responseClass.fromJsonString(builder.getSerializedResponse())
+            instance = protocol.fromJson(
+                builder.getSerializedResponse(), responseClass)
             self.assertEqual(nextPageToken, instance.nextPageToken)

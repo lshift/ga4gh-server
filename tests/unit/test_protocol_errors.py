@@ -45,14 +45,6 @@ class TestFrontendErrors(unittest.TestCase):
             if requestClass in supportedMethods:
                 self.endPointMap[endPoint] = requestClass
 
-    # def _createInstance(self, requestClass):
-    #     """
-    #     Returns a valid instance of the specified class.
-    #     """
-    #     creator = avrotools.Creator(requestClass)
-    #     instance = creator.getTypicalInstance()
-    #     return instance
-
     def assertRawRequestRaises(self, exceptionClass, url, requestString):
         """
         Verifies that the specified request string returns a protocol
@@ -63,9 +55,9 @@ class TestFrontendErrors(unittest.TestCase):
             url, headers={'Content-type': 'application/json'},
             data=requestString)
         self.assertEqual(response.status_code, exceptionClass.httpStatus)
-        error = protocol.GAException.fromJsonString(response.data)
+        error = protocol.fromJson(response.data, protocol.GAException)
         self.assertEqual(
-            error.errorCode, exceptionClass.getErrorCode())
+            error.error_code, exceptionClass.getErrorCode())
         self.assertGreater(len(error.message), 0)
 
     def assertRequestRaises(self, exceptionClass, url, request):
@@ -76,23 +68,23 @@ class TestFrontendErrors(unittest.TestCase):
         self.assertRawRequestRaises(
             exceptionClass, url, request.toJsonString())
 
-    # def testPageSize(self):
-    #     for url, requestClass in self.endPointMap.items():
-    #         for badType in ["", "1", "None", 0.0, 1e3]:
-    #             request = self._createInstance(requestClass)
-    #             request.pageSize = badType
-    #             self.assertRequestRaises(
-    #                 exceptions.RequestValidationFailureException, url, request)
-    #         for badSize in [-100, -1, 0]:
-    #             request = self._createInstance(requestClass)
-    #             request.pageSize = badSize
-    #             self.assertRequestRaises(
-    #                 exceptions.BadPageSizeException, url, request)
-    #
-    # def testPageToken(self):
-    #     for url, requestClass in self.endPointMap.items():
-    #         for badType in [0, 0.0, 1e-3, {}, [], [None]]:
-    #             request = self._createInstance(requestClass)
-    #             request.pageToken = badType
-    #             self.assertRequestRaises(
-    #                 exceptions.RequestValidationFailureException, url, request)
+    def testPageSize(self):
+        for url, requestClass in self.endPointMap.items():
+            for badType in ["", "1", "None", 0.0, 1e3]:
+                request = requestClass()
+                request.pageSize = badType
+                self.assertRequestRaises(
+                    exceptions.RequestValidationFailureException, url, request)
+            for badSize in [-100, -1, 0]:
+                request = requestClass()
+                request.pageSize = badSize
+                self.assertRequestRaises(
+                    exceptions.BadPageSizeException, url, request)
+
+    def testPageToken(self):
+        for url, requestClass in self.endPointMap.items():
+            for badType in [0, 0.0, 1e-3, {}, [], [None]]:
+                request = requestClass()
+                request.pageToken = badType
+                self.assertRequestRaises(
+                    exceptions.RequestValidationFailureException, url, request)

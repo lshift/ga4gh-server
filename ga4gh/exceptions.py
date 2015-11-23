@@ -96,7 +96,7 @@ class RuntimeException(BaseServerException):
         it can be communicated back to the client.
         """
         error = protocol.GAException()
-        error.errorCode = self.getErrorCode()
+        error.error_code = self.getErrorCode()
         error.message = self.getMessage()
         return error
 

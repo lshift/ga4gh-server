@@ -16,7 +16,7 @@ import ga4gh.protocol as protocol
 import ga4gh.exceptions as exceptions
 import ga4gh.datamodel as datamodel
 
-from proto.ga4gh.variants_pb2 import *  # NOQA
+
 
 def convertVCFPhaseset(vcfPhaseset):
     """
@@ -154,7 +154,7 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         """
         Converts this VariantSet into its GA4GH protocol equivalent.
         """
-        protocolElement = VariantSet()
+        protocolElement = protocol.VariantSet()
         protocolElement.id = self.getId()
         protocolElement.dataset_id = self.getParentContainer().getId()
         protocolElement.name = self.getLocalId()
@@ -176,7 +176,7 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         Convenience method to set the common fields in a GA Variant
         object from this variant set.
         """
-        ret = Variant()
+        ret = protocol.Variant()
         ret.created = self._creationTime
         ret.updated = self._updatedTime
         ret.variant_set_id = self.getId()

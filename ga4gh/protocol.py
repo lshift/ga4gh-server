@@ -9,7 +9,13 @@ import datetime
 
 import google.protobuf.json_format as json_format
 
-from proto.ga4gh.variant_service_pb2 import *  # NOQA
+from proto.ga4gh.common_pb2 import *
+from proto.ga4gh.read_service_pb2 import *
+from proto.ga4gh.reads_pb2 import *
+from proto.ga4gh.reference_service_pb2 import *
+from proto.ga4gh.references_pb2 import *
+from proto.ga4gh.variant_service_pb2 import *
+from proto.ga4gh.variants_pb2 import *
 
 # A map of response objects to the name of the attribute used to
 # store the values returned.
@@ -37,6 +43,18 @@ def convertDatetime(t):
     millis = delta.total_seconds() * 1000
     return int(millis)
 
+
+def toJson(protoObject):
+    """
+    Serialises a proto-buf object as json
+    """
+    return json_format.MessageToJson(protoObject)
+
+def fromJson(json, protoClass):
+    """
+    Deserialise json into an instance of proto-buf class
+    """
+    return json_format.Parse(json, protoClass())
 
 class SearchResponseBuilder(object):
     """
@@ -118,5 +136,5 @@ class SearchResponseBuilder(object):
             self._next_page_token = ""
         self._protoObject.next_page_token = self._next_page_token
         # s = self._protoObject.SerializeToString()
-        s = json_format.MessageToJson(self._protoObject)
+        s = toJson(self._protoObject)
         return s

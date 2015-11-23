@@ -21,7 +21,7 @@ class TestExceptionHandler(unittest.TestCase):
         pass
 
     def getGa4ghException(self, data):
-        return protocol.GAException.fromJsonString(data)
+        return protocol.fromJson(data, protocol.GAException)
 
     def testObjectNotFoundException(self):
         exception = exceptions.ObjectNotFoundException()

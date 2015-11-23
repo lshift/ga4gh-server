@@ -66,7 +66,7 @@ class TestFrontend(unittest.TestCase):
             'Origin': self.exampleUrl,
         }
         return self.app.post(
-            path, headers=headers, data=request.toJsonString())
+            path, headers=headers, data=protocol.toJson(request))
 
     def sendGetRequest(self, path):
         """
@@ -79,8 +79,8 @@ class TestFrontend(unittest.TestCase):
 
     def sendVariantsSearch(self):
         response = self.sendVariantSetsSearch()
-        variantSets = protocol.SearchVariantSetsResponse().fromJsonString(
-            response.data).variantSets
+        variantSets = protocol.fromJson(
+            response.data, protocol.SearchVariantSetsResponse).variantSets
         request = protocol.SearchVariantsRequest()
         request.variantSetId = variantSets[0].id
         request.referenceName = "1"
@@ -90,15 +90,15 @@ class TestFrontend(unittest.TestCase):
 
     def sendVariantSetsSearch(self):
         request = protocol.SearchVariantSetsRequest()
-        request.datasetId = self.datasetId
+        request.dataset_id = self.datasetId
         return self.sendPostRequest('/variantsets/search', request)
 
     def sendCallSetsSearch(self):
         response = self.sendVariantSetsSearch()
-        variantSets = protocol.SearchVariantSetsResponse().fromJsonString(
-            response.data).variantSets
+        variantSets = protocol.fromJson(
+            response.data, protocol.SearchVariantSetsResponse).variantSets
         request = protocol.SearchCallSetsRequest()
-        request.variantSetId = variantSets[0].id
+        request.variant_set_id = variantSets[0].id
         return self.sendPostRequest('/callsets/search', request)
 
     def sendReadsSearch(self, readGroupIds=None):
@@ -199,7 +199,8 @@ class TestFrontend(unittest.TestCase):
         ]
         for path in paths:
             response = self.app.get(path)
-            protocol.GAException.fromJsonString(response.get_data())
+            exception = protocol.fromJson(
+                response.get_data(), protocol.GAException)
             self.assertEqual(404, response.status_code)
 
     def testCors(self):
@@ -231,11 +232,13 @@ class TestFrontend(unittest.TestCase):
         returns the correct status code.
         """
         response = self.app.post(path)
-        protocol.GAException.fromJsonString(response.get_data())
+        postException = protocol.fromJson(
+            response.get_data(), protocol.GAException)
         self.assertEqual(415, response.status_code)
         if not getDefined:
             getResponse = self.app.get(path)
-            protocol.GAException.fromJsonString(getResponse.get_data())
+            getException = protocol.fromJson(
+                getResponse.get_data(), protocol.GAException)
             self.assertEqual(405, getResponse.status_code)
 
         # Malformed requests should return 400
@@ -287,22 +290,22 @@ class TestFrontend(unittest.TestCase):
     def testVariantsSearch(self):
         response = self.sendVariantsSearch()
         self.assertEqual(200, response.status_code)
-        responseData = protocol.SearchVariantsResponse.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(
+            response.data, protocol.SearchVariantsResponse)
         self.assertEqual(len(responseData.variants), 1)
 
     def testVariantSetsSearch(self):
         response = self.sendVariantSetsSearch()
         self.assertEqual(200, response.status_code)
-        responseData = protocol.SearchVariantSetsResponse.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(
+            response.data, protocol.SearchVariantSetsResponse)
         self.assertEqual(len(responseData.variantSets), 1)
 
     def testGetDataset(self):
         # Test OK: ID found
         response = self.sendDatasetsSearch()
-        responseData = protocol.SearchDatasetsResponse.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(
+            response.data, protocol.SearchDatasetsResponse)
         datasetId = responseData.datasets[0].id
         response = self.sendGetDataset(datasetId)
         self.assertEqual(200, response.status_code)
@@ -315,8 +318,8 @@ class TestFrontend(unittest.TestCase):
 
     def testGetVariantSet(self):
         response = self.sendVariantSetsSearch()
-        responseData = protocol.SearchVariantSetsResponse.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(
+            response.data, protocol.SearchVariantSetsResponse)
         variantSetId = responseData.variantSets[0].id
         response = self.sendGetVariantSet(variantSetId)
         self.assertEqual(200, response.status_code)
@@ -328,24 +331,21 @@ class TestFrontend(unittest.TestCase):
     def testGetReadGroupSet(self):
         response = self.sendGetReadGroupSet()
         self.assertEqual(200, response.status_code)
-        responseData = protocol.ReadGroupSet.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(response.data, protocol.ReadGroupSet)
         self.assertEqual(
             responseData.id, self.readGroupSetId)
 
     def testGetReadGroup(self):
         response = self.sendGetReadGroup()
         self.assertEqual(200, response.status_code)
-        responseData = protocol.ReadGroup.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(response.data, protocol.ReadGroup)
         self.assertEqual(
             responseData.id, self.readGroupId)
 
     def testGetCallset(self):
         response = self.sendGetCallset()
         self.assertEqual(200, response.status_code)
-        responseData = protocol.CallSet.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(response.data, protocol.CallSet)
         self.assertEqual(
             responseData.id, self.callSetId)
 
@@ -356,15 +356,15 @@ class TestFrontend(unittest.TestCase):
     def testCallSetsSearch(self):
         response = self.sendCallSetsSearch()
         self.assertEqual(200, response.status_code)
-        responseData = protocol.SearchCallSetsResponse.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(
+            response.data, protocol.SearchCallSetsResponse)
         self.assertEqual(len(responseData.callSets), 1)
 
     def testReadsSearch(self):
         response = self.sendReadsSearch()
         self.assertEqual(200, response.status_code)
-        responseData = protocol.SearchReadsResponse.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(
+            response.data, protocol.SearchReadsResponse)
         self.assertEqual(len(responseData.alignments), 2)
         self.assertEqual(
             responseData.alignments[0].id,
@@ -372,8 +372,8 @@ class TestFrontend(unittest.TestCase):
 
     def testDatasetsSearch(self):
         response = self.sendDatasetsSearch()
-        responseData = protocol.SearchDatasetsResponse.fromJsonString(
-            response.data)
+        responseData = protocol.fromJson(
+            response.data, protocol.SearchDatasetsResponse)
         datasets = list(responseData.datasets)
         self.assertEqual(self.datasetId, datasets[0].id)
 

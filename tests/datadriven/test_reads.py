@@ -171,10 +171,10 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
                 datamodel.CompoundId.deobfuscate(gaReadGroup.experiment.id))
             self.assertEqual(
                 readGroupInfo.instrumentModel,
-                gaReadGroup.experiment.instrumentModel)
+                gaReadGroup.experiment.instrument_model)
             self.assertEqual(
                 readGroupInfo.sequencingCenter,
-                gaReadGroup.experiment.sequencingCenter)
+                gaReadGroup.experiment.sequencing_center)
             self.assertEqual(
                 readGroupInfo.experimentDescription,
                 gaReadGroup.experiment.description)
@@ -183,10 +183,10 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
                 gaReadGroup.experiment.library)
             self.assertEqual(
                 readGroupInfo.platformUnit,
-                gaReadGroup.experiment.platformUnit)
+                gaReadGroup.experiment.platform_unit)
             self.assertEqual(
                 readGroupInfo.runTime,
-                gaReadGroup.experiment.runTime)
+                gaReadGroup.experiment.run_time)
 
     def testPrograms(self):
         # test that program info is set correctly

@@ -9,8 +9,6 @@ from __future__ import unicode_literals
 # import json
 import os
 
-import google.protobuf.json_format as json_format
-
 import ga4gh.datamodel as datamodel
 import ga4gh.datamodel.datasets as datasets
 import ga4gh.datamodel.references as references
@@ -547,7 +545,7 @@ class AbstractBackend(object):
         object into its protocol representation.
         """
         protocolElement = obj.toProtocolElement()
-        jsonString = json_format.MessageToJson(protocolElement)
+        jsonString = protocol.toJson(protocolElement)
         return jsonString
 
     def runSearchRequest(
@@ -562,25 +560,13 @@ class AbstractBackend(object):
         any point using the nextPageToken attribute of the request object.
         """
         self.startProfile()
-        # avro implementation
-        # try:
-        #     requestDict = json.loads(requestStr)
-        # except ValueError:
-        #     raise exceptions.InvalidJsonException(requestStr)
-        # self.validateRequest(requestDict, requestClass)
-        # request = requestClass.fromJsonDict(requestDict)
-        # if request.pageSize is None:
-        #     request.pageSize = self._defaultPageSize
-        request = requestClass()
-        # TODO add a try/catch here to deal with malformed input.
-        # request.ParseFromString(requestStr)
-        json_format.Parse(requestStr, request)
+        request = protocol.fromJson(requestStr, requestClass)
         # TODO How do we detect when the page size is not set?
         # Proto3 doesn't support HasField any more for some reason
-        if request.pageSize <= 0:
-            raise exceptions.BadPageSizeException(request.pageSize)
+        if request.page_size <= 0:
+            raise exceptions.BadPageSizeException(request.page_size)
         responseBuilder = protocol.SearchResponseBuilder(
-            responseClass, request.pageSize, self._maxResponseLength)
+            responseClass, request.page_size, self._maxResponseLength)
         nextPageToken = None
         for obj, nextPageToken in objectGenerator(request):
             responseBuilder.addValue(obj)
@@ -618,7 +604,7 @@ class AbstractBackend(object):
         response.offset = start
         response.sequence = sequence
         response.nextPageToken = nextPageToken
-        return json_format.MessageToJson(response)
+        return protocol.toJson(response)
 
     # Get requests.
 
@@ -643,7 +629,7 @@ class AbstractBackend(object):
         # TODO variant is a special case here, as it's returning a
         # protocol element rather than a datamodel object. We should
         # fix this for consistency.
-        jsonString = json_format.MessageToJson(gaVariant)
+        jsonString = protocol.toJson(gaVariant)
         return jsonString
 
     def runGetReadGroupSet(self, id_):

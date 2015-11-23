@@ -74,7 +74,7 @@ class TestSimulatedStack(unittest.TestCase):
         """
         response = self.sendJsonPostRequest(path, request.toJsonString())
         self.assertEqual(200, response.status_code)
-        responseData = responseClass.fromJsonString(response.data)
+        responseData = protocol.fromJson(response.data, responseClass)
         self.assertTrue(responseData.validate(responseData.toJsonDict()))
         return responseData
 
@@ -92,7 +92,7 @@ class TestSimulatedStack(unittest.TestCase):
         """
         response = self.sendObjectGetRequest(path, id_)
         self.assertEqual(200, response.status_code)
-        obj = responseClass.fromJsonString(response.data)
+        obj = protocol.fromJson(response.data, responseClass)
         self.assertTrue(responseClass.validate(obj.toJsonDict()))
         return obj
 
@@ -104,8 +104,8 @@ class TestSimulatedStack(unittest.TestCase):
         path = '/references/{}/bases'.format(id_)
         response = self.app.get(path, query_string=request.toJsonDict())
         self.assertEqual(response.status_code, 200)
-        obj = protocol.ListReferenceBasesResponse.fromJsonString(
-            response.data)
+        obj = protocol.fromJson(
+            response.data, protocol.ListReferenceBasesResponse)
         self.assertTrue(obj.validate(obj.toJsonDict()))
         return obj
 
@@ -205,9 +205,9 @@ class TestSimulatedStack(unittest.TestCase):
         Checks that the specified response contains a search failure.
         """
         self.assertEqual(404, response.status_code)
-        error = protocol.GAException.fromJsonString(response.data)
-        self.assertTrue(error.validate(error.toJsonDict()))
-        self.assertGreater(error.errorCode, 0)
+        error = protocol.fromJson(response.data, protocol.GAException)
+        # self.assertTrue(error.validate(error.toJsonDict()))
+        self.assertGreater(error.error_code, 0)
         self.assertGreater(len(error.message), 0)
 
     def verifySearchMethodFails(self, request, path):

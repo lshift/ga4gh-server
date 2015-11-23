@@ -155,15 +155,15 @@ class AbstractReferenceSet(datamodel.DatamodelObject):
         Returns the GA4GH protocol representation of this ReferenceSet.
         """
         ret = protocol.ReferenceSet()
-        ret.assemblyId = self.getAssemblyId()
+        ret.assembly_id = self.getAssemblyId()
         ret.description = self.getDescription()
         ret.id = self.getId()
-        ret.isDerived = self.getIsDerived()
+        ret.is_derived = self.getIsDerived()
         ret.md5checksum = self.getMd5Checksum()
-        ret.ncbiTaxonId = self.getNcbiTaxonId()
-        ret.referenceIds = self._referenceIds
-        ret.sourceAccessions = self.getSourceAccessions()
-        ret.sourceURI = self.getSourceUri()
+        ret.ncbi_taxon_id = self.getNcbiTaxonId()
+        ret.reference_ids = self._referenceIds
+        ret.source_accessions = self.getSourceAccessions()
+        ret.source_uri = self.getSourceUri()
         ret.name = self.getLocalId()
         return ret
 

@@ -22,8 +22,6 @@ import oic.oauth2
 import oic.oic.message as message
 import requests
 
-import google.protobuf.json_format as json_format
-
 import ga4gh
 import ga4gh.backend as backend
 import ga4gh.datamodel as datamodel
@@ -309,7 +307,7 @@ def handleException(exception):
     if not isinstance(exception, exceptions.BaseServerException):
         serverException = exceptions.getServerError(exception)
     error = serverException.toProtocolElement()
-    responseStr = json_format.MessageToJson(error)
+    responseStr = protocol.toJson(error)
 
     return getFlaskResponse(responseStr, serverException.httpStatus)
 
