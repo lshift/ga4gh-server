@@ -310,19 +310,19 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
     def assertAlignmentsEqual(self, gaAlignment, pysamAlignment,
                               readGroupInfo):
         if pysamAlignment.query_qualities is None:
-            self.assertEqual(gaAlignment.alignedQuality, [])
+            self.assertEqual(gaAlignment.aligned_quality, [])
         else:
             self.assertEqual(
-                gaAlignment.alignedQuality,
+                gaAlignment.aligned_quality,
                 list(pysamAlignment.query_qualities))
         self.assertEqual(
-            gaAlignment.alignedSequence,
+            gaAlignment.aligned_sequence,
             pysamAlignment.query_sequence)
         self.assertEqual(
-            gaAlignment.alignment.mappingQuality,
+            gaAlignment.alignment.mapping_quality,
             pysamAlignment.mapping_quality)
         self.assertEqual(
-            gaAlignment.alignment.position.referenceName,
+            gaAlignment.alignment.position.reference_name,
             readGroupInfo.samFile.getrname(pysamAlignment.reference_id))
         self.assertEqual(
             gaAlignment.alignment.position.position,
@@ -333,16 +333,16 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
             gaAlignment.alignment.cigar,
             pysamAlignment.cigar)
         self.assertFlag(
-            gaAlignment.duplicateFragment,
+            gaAlignment.duplicate_fragment,
             pysamAlignment, reads.SamFlags.DUPLICATE_FRAGMENT)
         self.assertFlag(
-            gaAlignment.failedVendorQualityChecks,
+            gaAlignment.failed_vendor_quality_checks,
             pysamAlignment, reads.SamFlags.FAILED_VENDOR_QUALITY_CHECKS)
         self.assertEqual(
-            gaAlignment.fragmentLength,
+            gaAlignment.fragment_length,
             pysamAlignment.template_length)
         self.assertEqual(
-            gaAlignment.fragmentName,
+            gaAlignment.fragment_name,
             pysamAlignment.query_name)
         compoundId = datamodel.ReadAlignmentCompoundId(
             readGroupInfo.gaReadGroup.getCompoundId(),
@@ -353,25 +353,25 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
             {key: [str(value)] for key, value in pysamAlignment.tags})
         if pysamAlignment.next_reference_id != -1:
             self.assertEqual(
-                gaAlignment.nextMatePosition.position,
+                gaAlignment.next_mate_position.position,
                 pysamAlignment.next_reference_start)
             self.assertEqual(
-                gaAlignment.nextMatePosition.referenceName,
+                gaAlignment.next_mate_position.reference_name,
                 readGroupInfo.samFile.getrname(
                     pysamAlignment.next_reference_id))
         else:
-            self.assertIsNone(gaAlignment.nextMatePosition)
+            self.assertIsNone(gaAlignment.next_mate_position)
         self.assertFlag(
-            gaAlignment.properPlacement,
+            gaAlignment.proper_placement,
             pysamAlignment, reads.SamFlags.PROPER_PLACEMENT)
         self.assertEqual(
-            gaAlignment.readGroupId,
+            gaAlignment.read_group_id,
             readGroupInfo.id)
         self.assertFlag(
-            gaAlignment.secondaryAlignment,
+            gaAlignment.secondary_alignment,
             pysamAlignment, reads.SamFlags.SECONDARY_ALIGNMENT)
         self.assertFlag(
-            gaAlignment.supplementaryAlignment,
+            gaAlignment.supplementary_alignment,
             pysamAlignment, reads.SamFlags.SUPPLEMENTARY_ALIGNMENT)
         # TODO test readNumber and numberReads (nice naming guys...) once
         # we have figured out what they mean and how the map back to
@@ -390,4 +390,4 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
             self.assertEqual(
                 gaCigarUnitOperation, operation)
             self.assertEqual(
-                gaCigarUnit.operationLength, length)
+                gaCigarUnit.operation_length, length)
