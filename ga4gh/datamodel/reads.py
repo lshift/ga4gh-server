@@ -16,7 +16,6 @@ import ga4gh.exceptions as exceptions
 import ga4gh.protocol as protocol
 import ga4gh.pb as pb
 
-
 def parseMalformedBamHeader(headerDict):
     """
     Parses the (probably) intended values out of the specified
@@ -565,7 +564,8 @@ class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup):
             read.flag, SamFlags.FAILED_VENDOR_QUALITY_CHECKS)
         ret.fragment_length = read.template_length
         ret.fragment_name = read.query_name
-        ret.info = {key: [str(value)] for key, value in read.tags}
+        for key, value in read.tags:
+            ret.info[key].values.add(string_value = str(value))
         if read.next_reference_id != -1:
             ret.next_mate_position.reference_name = samFile.getrname(
                 read.next_reference_id)
