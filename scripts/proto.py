@@ -40,6 +40,8 @@ def version_compare(version1, version2):
 protocs = [realpath(x) for x in "%s/protobuf/src/protoc" % server, find_in_path("protoc") if x != None]
 protoc = None
 for c in protocs:
+    if not exists(c):
+        continue
     output = check_output([c, "--version"]).strip()
     try:
         (lib, version) = output.split(" ")
@@ -60,6 +62,8 @@ print "Using %s for protoc" % protoc
 protos = []
 for root, dirs, files in walk(src):
     protos.extend([join(root, f) for f in fnmatch.filter(files, "*.proto")])
+if len(protos) == 0:
+    raise Exception, "Didn't find any proto files in %s" % src
 cmd = "%s -I %s --python_out=%s %s" % (protoc, src, server, " ".join(protos))
 system(cmd)
 
