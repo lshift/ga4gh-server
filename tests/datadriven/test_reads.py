@@ -349,7 +349,7 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
             pysamAlignment.query_name)
         self.assertEqual(gaAlignment.id, str(compoundId))
         self.assertEqual(
-            gaAlignment.info,
+            protocol.getDictFromMessageMap(gaAlignment.info),
             {key: [str(value)] for key, value in pysamAlignment.tags})
         if pysamAlignment.next_reference_id != -1:
             self.assertEqual(

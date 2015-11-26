@@ -59,6 +59,11 @@ def getValueFromValue(value):
         raise Exception, "Nothing set for %s" % value
     return getattr(value, value.WhichOneof("kind"))
 
+def mergeLists(lists):
+    return reduce(list.__add__, lists)
+
+def getDictFromMessageMap(messageMap):
+    return dict([(k, [getValueFromValue(x) for x in v.values]) for (k,v) in messageMap._values.items()])
 
 def toJson(protoObject):
     """
