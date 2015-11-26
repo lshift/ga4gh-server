@@ -406,9 +406,9 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
 
         for key, value in pysamCall.iteritems():
             if key == 'GL' and value is not None:
-                call.genotypeLikelihood.extend(list(value))
+                call.genotype_likelihood.extend(list(value))
             elif key != 'GT':
-                call.info[key] = _encodeValue(value)
+                call.info[key].values.extend(_encodeValue(value))
 
     def convertVariant(self, record, callSetIds):
         """
@@ -429,7 +429,7 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
         # by GAVariant.
         for key, value in record.info.iteritems():
             if value is not None:
-                variant.info[key].extend(_encodeValue(value))
+                variant.info[key].values.extend(_encodeValue(value))
 
         # NOTE: THE LABELED LINES SHOULD BE REMOVED ONCE PYSAM SUPPORTS
         # phaseset

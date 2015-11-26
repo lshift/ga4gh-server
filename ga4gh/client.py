@@ -518,8 +518,8 @@ class LocalClient(AbstractClient):
         # arguments dictionary.
         if request.end is None:
             del requestArgs["end"]
-        if request.pageToken is None:
-            del requestArgs["pageToken"]
+        if request.page_token is None:
+            del requestArgs["page_token"]
         responseJson = self._backend.runListReferenceBases(id_, requestArgs)
         return self._deserializeResponse(
             responseJson, protocol.ListReferenceBasesResponse)
