@@ -97,6 +97,14 @@ GA4GH reference server:
 This will take a little time as the libraries that we require are
 fetched from PyPI and built.
 
+**************
+Configuring protobuf
+**************
+
+* git submodule update --init
+* cd protobuf/python
+* python setup.py build
+
 It is also important to set up an
 `upstream remote <https://help.github.com/articles/configuring-a-remote-for-a-fork/>`_
 for your repo so that you can sync up with the changes that other people

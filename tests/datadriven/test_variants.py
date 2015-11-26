@@ -18,7 +18,8 @@ import ga4gh.protocol as protocol
 import ga4gh.exceptions as exceptions
 import tests.datadriven as datadriven
 import tests.utils as utils
-
+from datadiff.tools import assert_equal
+import json
 
 def testVariantSets():
     testDataDir = "tests/data/datasets/dataset1/variants"
@@ -398,6 +399,8 @@ class VariantSetTest(datadriven.DataDrivenTest):
                     variantSet.getCompoundId(), reference_name,
                     variant.start, md5)
                 gotVariant = variantSet.getVariant(compoundId)
+                variant_dict = {"info": variant.INFO}
+                assert_equal(json.loads(protocol.toJson(gotVariant)), variant_dict)
                 self.assertEqual(str(compoundId), gotVariant.id)
 
                 # negative test: change start position to past variant

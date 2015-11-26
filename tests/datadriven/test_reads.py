@@ -15,6 +15,7 @@ import ga4gh.datamodel.references as references
 import ga4gh.protocol as protocol
 import tests.datadriven as datadriven
 import tests.utils as utils
+import proto.ga4gh.common_pb2 as common_pb2
 
 import pysam
 
@@ -360,7 +361,7 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
                 readGroupInfo.samFile.getrname(
                     pysamAlignment.next_reference_id))
         else:
-            self.assertIsNone(gaAlignment.next_mate_position)
+            self.assertEqual(gaAlignment.next_mate_position, common_pb2.Position()) # i.e. equal to empty object
         self.assertFlag(
             gaAlignment.proper_placement,
             pysamAlignment, reads.SamFlags.PROPER_PLACEMENT)
