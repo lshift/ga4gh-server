@@ -510,7 +510,7 @@ class LocalClient(AbstractClient):
         return self._deserializeResponse(responseJson, protocolResponseClass)
 
     def _runListReferenceBasesPageRequest(self, id_, request):
-        requestArgs = request.toJsonDict()
+        requestArgs = protocol.toJson(request)
         # We need to remove end from this dict if it's not specified because
         # of the way we're interacting with Flask and HTTP GET params.
         # TODO: This is a really nasty way of doing things; we really

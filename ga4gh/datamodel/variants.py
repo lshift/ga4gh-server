@@ -16,7 +16,7 @@ import ga4gh.protocol as protocol
 import ga4gh.pb as pb
 import ga4gh.exceptions as exceptions
 import ga4gh.datamodel as datamodel
-
+from proto.google.protobuf.struct_pb2 import Value
 
 
 def convertVCFPhaseset(vcfPhaseset):
@@ -295,9 +295,9 @@ class SimulatedVariantSet(AbstractVariantSet):
 
 def _encodeValue(value):
     if isinstance(value, (list, tuple)):
-        return [str(v) for v in value]
+        return [Value(string_value = str(v)) for v in value]
     else:
-        return [str(value)]
+        return [Value(string_value = str(value))]
 
 
 _nothing = object()
@@ -464,7 +464,7 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
                 return variant
             elif record.start > start:
                 raise exceptions.ObjectNotFoundException()
-        raise exceptions.ObjectNotFoundException(compoundId)
+        raise exceptions.ObjectWithIdNotFoundException(compoundId)
 
     def getVariants(self, referenceName, startPosition, endPosition,
                     callSetIds=None):

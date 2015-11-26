@@ -72,14 +72,15 @@ class VariantSetTest(datadriven.DataDrivenTest):
 
     def _verifyInfoEqual(self, gaObjectInfo, pyvcfInfo):
         def _assertEquivalentGaVCFValues(gaValue, pyvcfValue):
+            compareValue = protocol.getValueFromValue(gaValue)
             if isinstance(pyvcfValue, str):
-                self.assertEqual(gaValue, pyvcfValue)
+                self.assertEqual(compareValue, pyvcfValue)
             elif isinstance(pyvcfValue, (int, bool)):
-                self.assertEqual(gaValue, str(pyvcfValue))
+                self.assertEqual(compareValue, str(pyvcfValue))
             elif isinstance(pyvcfValue, float):
-                self.assertAlmostEqual(float(gaValue), float(pyvcfValue))
+                self.assertAlmostEqual(float(compareValue), float(pyvcfValue))
             elif pyvcfValue is None:
-                self.assertEqual(gaValue, ".")
+                self.assertEqual(compareValue, ".")
             else:
                 raise Exception(key, (
                     " values are inconsistent",

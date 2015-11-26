@@ -12,7 +12,7 @@ import fnmatch
 import os
 import inspect
 
-# import ga4gh.avrotools as avrotools
+import google.protobuf.json_format as json_format
 
 
 def _wrapTestMethod(method):
@@ -259,21 +259,15 @@ class DataDrivenTest(TestCase):
         """
         raise NotImplementedError()
 
-    # def assertValid(self, protocolClass, jsonDict):
-    #     """
-    #     Asserts that the specified JSON dictionary is a valid instance
-    #     of the specified protocol class.
-    #     """
-    #     if not protocolClass.validate(jsonDict):
-    #         # validator = avrotools.Validator(protocolClass)
-    #         # invalidFields = validator.getInvalidFields(jsonDict)
-    #         message = (
-    #             "{} is not a valid instance of {}. "
-    #             "Invalid fields = {}".format(
-    #                 jsonDict, protocolClass
-    #                 # , invalidFields
-    #             ))
-    #         assert False, message
+    def assertValid(self, protocolClass, jsonDict):
+        """
+        Asserts that the specified JSON dictionary is a valid instance
+        of the specified protocol class.
+        """
+        try:
+            json_format.Parse(jsonDict, protocolClass())
+        except json_format.ParseError, e:
+            assert False, e.message
 
     def testProtocolElementValid(self):
         self.assertIsInstance(

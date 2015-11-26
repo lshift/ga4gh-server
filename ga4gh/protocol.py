@@ -19,6 +19,7 @@ from proto.ga4gh.reference_service_pb2 import *
 from proto.ga4gh.references_pb2 import *
 from proto.ga4gh.variant_service_pb2 import *
 from proto.ga4gh.variants_pb2 import *
+from proto.google.protobuf.struct_pb2 import Value
 
 # A map of response objects to the name of the attribute used to
 # store the values returned.
@@ -50,6 +51,13 @@ def convertDatetime(t):
     delta = t - epoch
     millis = delta.total_seconds() * 1000
     return int(millis)
+
+def getValueFromValue(value):
+    if type(value) != Value:
+        raise Exception, type(value)
+    if value.WhichOneof("kind") == None:
+        raise Exception, "Nothing set for %s" % value
+    return getattr(value, value.WhichOneof("kind"))
 
 
 def toJson(protoObject):
