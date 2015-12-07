@@ -447,14 +447,14 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
         return variant
 
     def getVariant(self, compoundId):
-        if compoundId.referenceName in self._chromFileMap:
-            varFileName = self._chromFileMap[compoundId.referenceName]
+        if compoundId.reference_name in self._chromFileMap:
+            varFileName = self._chromFileMap[compoundId.reference_name]
         else:
             raise exceptions.ObjectNotFoundException(compoundId)
         start = int(compoundId.start)
         referenceName, startPosition, endPosition = \
             self.sanitizeVariantFileFetch(
-                compoundId.referenceName, start, start + 1)
+                compoundId.reference_name, start, start + 1)
         cursor = self.getFileHandle(varFileName).fetch(
             referenceName, startPosition, endPosition)
         for record in cursor:
