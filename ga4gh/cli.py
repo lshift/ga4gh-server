@@ -339,16 +339,16 @@ class VariantFormatterMixin(object):
         """
         for variant in gaObjects:
             print(
-                variant.id, variant.variantSetId, variant.names,
-                variant.referenceName, variant.start, variant.end,
-                variant.referenceBases, variant.alternateBases,
+                variant.id, variant.variant_set_id, variant.names,
+                variant.reference_name, variant.start, variant.end,
+                variant.reference_bases, variant.alternate_bases,
                 sep="\t", end="\t")
             for key, value in variant.info.items():
                 print(key, value, sep="=", end=";")
             print("\t", end="")
             for c in variant.calls:
                 print(
-                    c.callSetId, c.genotype, c.genotypeLikelihood, c.info,
+                    c.call_set_id, c.genotype, c.genotype_likelihood, c.info,
                     c.phaseset, sep=":", end="\t")
             print()
 

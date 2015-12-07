@@ -242,7 +242,7 @@ class AbstractClient(object):
         request.start = pb.int(start)
         request.end = pb.int(end)
         request.variant_set_id = variantSetId
-        request.call_set_ids = pb.string(callSetIds)
+        request.call_set_ids.extend(pb.string(callSetIds))
         request.page_size = pb.int(self._pageSize)
         return self._runSearchRequest(
             request, "variants", protocol.SearchVariantsResponse)
@@ -467,7 +467,7 @@ class HttpClient(AbstractClient):
         urlSuffix = "references/{id}/bases".format(id=id_)
         url = posixpath.join(self._urlPrefix, urlSuffix)
         params = self._getHttpParameters()
-        params.update(request.toJsonDict())
+        params.update(protocol.toDict(request))
         response = self._session.get(url, params=params)
         self._checkResponseStatus(response)
         return self._deserializeResponse(
