@@ -105,18 +105,18 @@ class VariantSetTest(datadriven.DataDrivenTest):
         if pyvcfCall.phased:
             phaseset = "*"
         self.assertEqual(gaCall.phaseset, phaseset)
-        if len(gaCall.genotypeLikelihood) > 0:
+        if len(gaCall.genotype_likelihood) > 0:
             self._compareTwoListFloats(
-                gaCall.genotypeLikelihood, pyvcfCall.data.GL)
+                gaCall.genotype_likelihood, pyvcfCall.data.GL)
         else:
             self.assertNotIn("GL", pyvcfCall.data)
         for key, value in gaCall.info.items():
             if key != "GT" and key != "GL":
-                if isinstance(value[0], (list, tuple)):
-                    self._compareTwoListFloats(value[0], getattr(
+                if isinstance(value.values[0], (list, tuple)):
+                    self._compareTwoListFloats(value.values[0], getattr(
                         pyvcfCall.data, key))
-                elif isinstance(value[0], float):
-                    self._compareTwoFloats(value[0], getattr(
+                elif isinstance(value.values[0], float):
+                    self._compareTwoFloats(value.values[0], getattr(
                         pyvcfCall.data, key))
 
     def _verifyVariantsEqual(self, gaVariants, pyvcfVariants):
@@ -163,7 +163,7 @@ class VariantSetTest(datadriven.DataDrivenTest):
             for call in variant.calls:
                 self.assertIn(call.call_set_name, sampleIds)
 
-    def _verifyVariantscall_set_ids(self, searchsampleIds):
+    def _verifyVariantsCallSetIds(self, searchsampleIds):
         """
         leaving searchSampleIds will get all samples.
         """
@@ -184,11 +184,11 @@ class VariantSetTest(datadriven.DataDrivenTest):
         self.assertEqual(len(gaCallSetVariants), len(self._variantRecords))
 
     def testSearchAllVariants(self):
-        self._verifyVariantscall_set_ids(self.vcfSamples[:1])
+        self._verifyVariantsCallSetIds(self.vcfSamples[:1])
 
-    def testSearchcall_set_idsSystematic(self):
+    def testSearchCallSetIdsSystematic(self):
         for sampleIds in utils.powerset(self.vcfSamples, maxSets=10):
-            self._verifyVariantscall_set_ids(list(sampleIds))
+            self._verifyVariantsCallSetIds(list(sampleIds))
 
     def testVariantsValid(self):
         end = datamodel.PysamDatamodelMixin.vcfMax
@@ -429,5 +429,6 @@ class VariantSetTest(datadriven.DataDrivenTest):
         if record.ALT[0] is None:
             alts = tuple()
         else:
-            alts = tuple([str(substitution) for substitution in record.ALT])
-        return hashlib.md5(record.REF + str(alts)).hexdigest()
+            alts = tuple([unicode(substitution) for substitution in record.ALT])
+        hash_str = record.REF + str(alts)    
+        return hashlib.md5(hash_str).hexdigest()

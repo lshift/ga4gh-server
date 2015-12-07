@@ -24,11 +24,14 @@ def _parseIntegerArgument(args, key, defaultValue):
     return the specified default value.
     """
     ret = defaultValue
-    if key in args:
-        try:
-            ret = int(args[key])
-        except ValueError:
-            raise exceptions.BadRequestIntegerException(key, args[key])
+    try:
+        if key in args:
+            try:
+                ret = int(args[key])
+            except ValueError:
+                raise exceptions.BadRequestIntegerException(key, args[key])
+    except TypeError:
+        raise Exception, (key, args)
     return ret
 
 
@@ -341,7 +344,7 @@ class AbstractBackend(object):
         Throws an error if the data is invalid
         """
         if self._requestValidation:
-            if not requestClass.validate(jsonDict):
+            if not protocol.validate(jsonDict, requestClass):
                 raise exceptions.RequestValidationFailureException(
                     jsonDict, requestClass)
 
@@ -497,7 +500,7 @@ class AbstractBackend(object):
         """
         compoundId = datamodel.VariantSetCompoundId.parse(request.variant_set_id)
         dataset = self.getDataset(compoundId.datasetId)
-        variantSet = dataset.getVariantSet(compoundId.variantSetId)
+        variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         intervalIterator = VariantsIntervalIterator(request, variantSet)
         return intervalIterator
 
@@ -508,7 +511,7 @@ class AbstractBackend(object):
         """
         compoundId = datamodel.VariantSetCompoundId.parse(request.variant_set_id)
         dataset = self.getDataset(compoundId.datasetId)
-        variantSet = dataset.getVariantSet(compoundId.variantSetId)
+        variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         if request.name is None:
             return self._topLevelObjectGenerator(
                 request, variantSet.getNumCallSets(),
@@ -571,7 +574,7 @@ class AbstractBackend(object):
         request arguments.
         """
         compoundId = datamodel.ReferenceCompoundId.parse(id_)
-        referenceSet = self.getReferenceSet(compoundId.referenceSetId)
+        referenceSet = self.getReferenceSet(compoundId.reference_set_id)
         reference = referenceSet.getReference(id_)
         start = _parseIntegerArgument(requestArgs, 'start', 0)
         end = _parseIntegerArgument(requestArgs, 'end', reference.getLength())
@@ -590,7 +593,8 @@ class AbstractBackend(object):
         response = protocol.ListReferenceBasesResponse()
         response.offset = start
         response.sequence = sequence
-        response.nextPageToken = nextPageToken
+        if nextPageToken != None:
+            response.next_page_token = nextPageToken
         return protocol.toJson(response)
 
     # Get requests.
@@ -601,7 +605,7 @@ class AbstractBackend(object):
         """
         compoundId = datamodel.CallSetCompoundId.parse(id_)
         dataset = self.getDataset(compoundId.datasetId)
-        variantSet = dataset.getVariantSet(compoundId.variantSetId)
+        variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         callSet = variantSet.getCallSet(id_)
         return self.runGetRequest(callSet)
 
@@ -611,7 +615,7 @@ class AbstractBackend(object):
         """
         compoundId = datamodel.VariantCompoundId.parse(id_)
         dataset = self.getDataset(compoundId.datasetId)
-        variantSet = dataset.getVariantSet(compoundId.variantSetId)
+        variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         gaVariant = variantSet.getVariant(compoundId)
         # TODO variant is a special case here, as it's returning a
         # protocol element rather than a datamodel object. We should
@@ -634,7 +638,7 @@ class AbstractBackend(object):
         """
         compoundId = datamodel.ReadGroupCompoundId.parse(id_)
         dataset = self.getDataset(compoundId.datasetId)
-        readGroupSet = dataset.getReadGroupSet(compoundId.readGroupSetId)
+        readGroupSet = dataset.getReadGroupSet(compoundId.read_group_set_id)
         readGroup = readGroupSet.getReadGroup(id_)
         return self.runGetRequest(readGroup)
 
@@ -643,7 +647,7 @@ class AbstractBackend(object):
         Runs a getReference request for the specified ID.
         """
         compoundId = datamodel.ReferenceCompoundId.parse(id_)
-        referenceSet = self.getReferenceSet(compoundId.referenceSetId)
+        referenceSet = self.getReferenceSet(compoundId.reference_set_id)
         reference = referenceSet.getReference(id_)
         return self.runGetRequest(reference)
 

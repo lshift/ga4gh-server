@@ -14,6 +14,7 @@ import inspect
 
 import google.protobuf.json_format as json_format
 import ga4gh.pb as pb
+import ga4gh.protocol as protocol
 
 
 def _wrapTestMethod(method):
@@ -281,5 +282,6 @@ class DataDrivenTest(TestCase):
             assert False, e.message
 
     def testProtocolElementValid(self):
-        self.assertIsInstance(
-            self._gaObject.toProtocolElement(), self.getProtocolClass())
+        self.assertValid(
+            self.getProtocolClass(),
+            protocol.toJson(self._gaObject.toProtocolElement()))

@@ -23,7 +23,7 @@ def convertVCFPhaseset(vcfPhaseset):
     """
     Parses the VCF phaseset string
     """
-    if vcfPhaseset is not None and vcfPhaseset != ".":
+    if vcfPhaseset is not None and vcfPhaseset != "." and vcfPhaseset is not "":
         phaseset = vcfPhaseset
     else:
         phaseset = "*"
@@ -67,8 +67,8 @@ class CallSet(datamodel.DatamodelObject):
         gaCallSet.updated = variantSet.getUpdatedTime()
         gaCallSet.id = self.getId()
         gaCallSet.name = self.getLocalId()
-        gaCallSet.sampleId = self.getLocalId()
-        gaCallSet.variantSetIds = [variantSet.getId()]
+        gaCallSet.sample_id = self.getLocalId()
+        gaCallSet.variant_set_ids.append(variantSet.getId())
         return gaCallSet
 
     def getSampleName(self):
@@ -209,9 +209,8 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         Produces an MD5 hash of the ga variant object to uniquely
         identify it
         """
-        return hashlib.md5(
-            gaVariant.reference_bases +
-            str(tuple(gaVariant.alternate_bases))).hexdigest()
+        hash_str = gaVariant.reference_bases + str(tuple(gaVariant.alternate_bases))
+        return hashlib.md5(hash_str).hexdigest()
 
 
 class SimulatedVariantSet(AbstractVariantSet):
@@ -245,7 +244,7 @@ class SimulatedVariantSet(AbstractVariantSet):
         start = int(compoundId.start)
         randomNumberGenerator.seed(self._randomSeed + start)
         variant = self.generateVariant(
-            compoundId.referenceName, start, randomNumberGenerator)
+            compoundId.reference_name, start, randomNumberGenerator)
         return variant
 
     def getVariants(self, referenceName, startPosition, endPosition,

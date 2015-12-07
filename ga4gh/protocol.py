@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import datetime
+import json
 
 import google.protobuf.json_format as json_format
 
@@ -31,6 +32,7 @@ _valueListNameMap = {
     SearchReferencesResponse: "references",
     SearchReadGroupSetsResponse: "read_group_sets",
     SearchReadsResponse: "alignments",
+    SearchCallSetsResponse: "call_sets",
 }
 
 
@@ -76,6 +78,16 @@ def fromJson(json, protoClass):
     Deserialise json into an instance of proto-buf class
     """
     return json_format.Parse(json, protoClass())
+
+def toDict(protoObject):
+    return json.loads(toJson(protoObject))
+
+def validate(json, protoClass):
+    try:
+        fromJson(json, protoClass) # The json conversion automatically validates
+        return True
+    except Exception:
+        raise
 
 class SearchResponseBuilder(object):
     """

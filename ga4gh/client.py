@@ -88,8 +88,8 @@ class AbstractClient(object):
         while notDone:
             response = self._runListReferenceBasesPageRequest(id_, request)
             basesList.append(response.sequence)
-            notDone = response.nextPageToken is not None
-            request.pageToken = response.nextPageToken
+            notDone = response.next_page_token is not ""
+            request.page_token = response.next_page_token
         return "".join(basesList)
 
     def _runGetRequest(self, objectName, protocolResponseClass, id_):
@@ -510,7 +510,7 @@ class LocalClient(AbstractClient):
         return self._deserializeResponse(responseJson, protocolResponseClass)
 
     def _runListReferenceBasesPageRequest(self, id_, request):
-        requestArgs = protocol.toJson(request)
+        requestArgs = protocol.toDict(request)
         # We need to remove end from this dict if it's not specified because
         # of the way we're interacting with Flask and HTTP GET params.
         # TODO: This is a really nasty way of doing things; we really

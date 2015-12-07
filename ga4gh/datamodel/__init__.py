@@ -187,14 +187,16 @@ class CompoundId(object):
         fashion. This is not intended for security purposes, but rather to
         dissuade users from depending on our internal ID structures.
         """
-        return base64.b64encode(idStr)
+        #return base64.b64encode(idStr)
+        return idStr
 
     @classmethod
     def deobfuscate(cls, idStr):
         """
         Reverses the obfuscation done by the :meth:`obfuscate` method.
         """
-        return base64.b64decode(idStr)
+        return idStr
+        #return base64.b64decode(idStr)
 
 
 class ReferenceSetCompoundId(CompoundId):
@@ -225,7 +227,7 @@ class VariantSetCompoundId(DatasetCompoundId):
     The compound id for a variant set
     """
     fields = DatasetCompoundId.fields + ['variant_set']
-    containerIds = DatasetCompoundId.containerIds + [('variant_setId', 1)]
+    containerIds = DatasetCompoundId.containerIds + [('variant_set_id', 1)]
 
 
 class VariantSetMetadataCompoundId(VariantSetCompoundId):
@@ -299,10 +301,10 @@ class DatamodelObject(object):
     def __init__(self, parentContainer, localId):
         self._parentContainer = parentContainer
         self._localId = localId
-        parentId = None
+        self.parentId = None
         if parentContainer is not None:
-            parentId = parentContainer.getCompoundId()
-        self._compoundId = self.compoundIdClass(parentId, localId)
+            self.parentId = parentContainer.getCompoundId()
+        self._compoundId = self.compoundIdClass(self.parentId, localId)
 
     def getId(self):
         """
@@ -334,6 +336,12 @@ class DatamodelObject(object):
         to.
         """
         return self._parentContainer
+
+    def getParentId(self):
+        """
+        Returns the parentId of this DatamodelObject
+        """
+        return self.parentId
 
 
 class PysamDatamodelMixin(object):

@@ -75,7 +75,10 @@ class TestClientJson(TestClientOutput):
         stdout = self.captureCliOutput(command, arguments, "json")
         cliOutput = []
         for line in stdout.splitlines():
-            cliOutput.append(json.loads(line))
+            try:
+                cliOutput.append(json.loads(line))
+            except ValueError,e:
+                raise Exception, (e,line, stdout)
         return cliOutput
 
     def verifyParsedOutputsEqual(
