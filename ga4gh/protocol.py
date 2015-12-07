@@ -12,6 +12,7 @@ import google.protobuf.json_format as json_format
 
 import ga4gh.pb as pb
 
+from proto import version
 from proto.ga4gh.common_pb2 import *
 from proto.ga4gh.metadata_pb2 import *
 from proto.ga4gh.read_service_pb2 import *
