@@ -67,11 +67,13 @@ def mergeLists(lists):
 def getDictFromMessageMap(messageMap):
     return dict([(k, [getValueFromValue(x) for x in v.values]) for (k,v) in messageMap._values.items()])
 
-def toJson(protoObject):
+def toJson(protoObject, indent = 2):
     """
     Serialises a proto-buf object as json
     """
-    return json_format.MessageToJson(protoObject)
+    # Using the internal method because this way we can reformat the JSON
+    js = json_format._MessageToJsonObject(protoObject, False)
+    return json.dumps(js, indent = indent)
 
 def fromJson(json, protoClass):
     """

@@ -51,6 +51,7 @@ def _parsePageToken(pageToken, numValues):
         values = map(int, tokens)
     except ValueError:
         msg = "Malformed integers in page token"
+        raise
         raise exceptions.BadPageTokenException(msg)
     return values
 
@@ -485,8 +486,8 @@ class AbstractBackend(object):
         compoundId = datamodel.ReadGroupCompoundId.parse(
             request.read_group_ids[0])
         dataset = self.getDataset(compoundId.datasetId)
-        readGroupSet = dataset.getReadGroupSet(compoundId.readGroupSetId)
-        readGroup = readGroupSet.getReadGroup(compoundId.readGroupId)
+        readGroupSet = dataset.getReadGroupSet(compoundId.read_group_set_id)
+        readGroup = readGroupSet.getReadGroup(compoundId.read_group_id)
         # Find the reference.
         referenceSet = readGroupSet.getReferenceSet()
         reference = referenceSet.getReference(request.reference_id)

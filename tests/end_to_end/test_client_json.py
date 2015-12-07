@@ -13,6 +13,7 @@ import unittest
 import ga4gh.client as client
 import ga4gh.backend as backend
 import ga4gh.cli as cli
+import ga4gh.protocol as protocol
 import tests.utils as utils
 
 
@@ -78,7 +79,7 @@ class TestClientJson(TestClientOutput):
             try:
                 cliOutput.append(json.loads(line))
             except ValueError,e:
-                raise Exception, (e,line, stdout)
+                raise Exception, (e,line, stdout, command, arguments)
         return cliOutput
 
     def verifyParsedOutputsEqual(
@@ -89,7 +90,7 @@ class TestClientJson(TestClientOutput):
         CLI command.
         """
         cliOutput = self.captureJsonOutput(cliCommand, cliArguments)
-        clientOutput = [gaObject.toJsonDict() for gaObject in clientIterator]
+        clientOutput = [protocol.toDict(gaObject) for gaObject in clientIterator]
         self.assertEqual(clientOutput, cliOutput)
 
     def testSearchAllDatasets(self):
