@@ -187,16 +187,14 @@ class CompoundId(object):
         fashion. This is not intended for security purposes, but rather to
         dissuade users from depending on our internal ID structures.
         """
-        #return base64.b64encode(idStr)
-        return idStr
+        return base64.b64encode(idStr)
 
     @classmethod
     def deobfuscate(cls, idStr):
         """
         Reverses the obfuscation done by the :meth:`obfuscate` method.
         """
-        return idStr
-        #return base64.b64decode(idStr)
+        return base64.b64decode(idStr)
 
 
 class ReferenceSetCompoundId(CompoundId):
