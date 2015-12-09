@@ -75,7 +75,10 @@ class TestSimulatedStack(unittest.TestCase):
         response = self.sendJsonPostRequest(path, protocol.toJson(request))
         self.assertEqual(200, response.status_code)
         responseData = protocol.fromJson(response.data, responseClass)
-        self.assertTrue(protocol.validate(protocol.toJson(responseData), type(responseData)))
+        self.assertTrue(
+            protocol.validate(
+                protocol.toJson(responseData),
+                type(responseData)))
         return responseData
 
     def sendObjectGetRequest(self, path, id_):
@@ -185,7 +188,8 @@ class TestSimulatedStack(unittest.TestCase):
         self.assertGreater(request.page_size, 0)
         responseData = self.sendSearchRequest(path, request, responseClass)
         self.assertEqual(responseData.next_page_token, "")
-        responseList = getattr(responseData, protocol.getValueListName(responseClass))
+        responseList = getattr(
+            responseData, protocol.getValueListName(responseClass))
         self.assertEqual(len(objects), len(responseList))
         for gaObject, datamodelObject in zip(responseList, objects):
             objectVerifier(gaObject, datamodelObject)

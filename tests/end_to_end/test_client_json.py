@@ -79,7 +79,7 @@ class TestClientJson(TestClientOutput):
             try:
                 cliOutput.append(json.loads(line))
             except ValueError, e:
-                raise Exception, (e, line, stdout, command, arguments)
+                raise Exception((e, line, stdout, command, arguments))
         return cliOutput
 
     def verifyParsedOutputsEqual(

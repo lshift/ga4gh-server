@@ -141,7 +141,9 @@ class EqualityTest(SchemaTest):
     def snakeKeyDict(self, item, field):
         snake_test_val = {}
         for k in item.keys():
-            k_field = [f for f in field.message_type.fields if prototools.ProtoTypeSwitch.toCamelCase(f.name) == k][0]
+            k_field = [
+                f for f in field.message_type.fields
+                if prototools.ProtoTypeSwitch.toCamelCase(f.name) == k][0]
             if json_format._IsMapEntry(k_field):
                 new_item = {}
                 for x in item[k].keys():
@@ -181,10 +183,11 @@ class EqualityTest(SchemaTest):
                         print(field.full_name, test_val[0].keys())
                         print("snake test val")
                         pprint.pprint(snake_test_val)
-                        raise Exception, \
-                            (e, field.message_type.full_name,
+                        raise Exception(
+                            (e,
+                                field.message_type.full_name,
                                 type(repeated),
-                            [f.name for f in field.message_type.fields])
+                                [f.name for f in field.message_type.fields]))
             elif hasattr(repeated, "get_or_create"):
                 v = repeated["bar"]
                 if type(v) == struct_pb2.Value:
@@ -192,11 +195,12 @@ class EqualityTest(SchemaTest):
                 else:
                     v.values.add(string_value="foo")
             else:
-                raise Exception, (type(repeated), dir(repeated))
+                raise Exception((type(repeated), dir(repeated)))
         elif type(test_val) == dict:
             value = getattr(i1, field.name)
             for k in test_val.keys():
-                k_field = [f for f in field.message_type.fields
+                k_field = [
+                    f for f in field.message_type.fields
                     if prototools.ProtoTypeSwitch.toCamelCase(f.name) == k][0]
 
                 if k_field.type == descriptor.FieldDescriptor.TYPE_ENUM:
