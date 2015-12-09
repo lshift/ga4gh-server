@@ -41,6 +41,5 @@ script:
   - nosetests --with-coverage --cover-package ga4gh
               --cover-inclusive --cover-min-percentage 85
               --cover-branches --cover-erase
-              --exclude google.*
   - make clean -C docs
   - make -C docs
