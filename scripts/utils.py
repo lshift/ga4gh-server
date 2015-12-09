@@ -141,8 +141,9 @@ def runCommandSplits(splits, silent=False):
         else:
             subprocess.check_call(splits)
     except OSError, e:
-        if e.errno == 2: # cmd not found
-            raise Exception,"Can't find command while trying to run %s" % splits
+        if e.errno == 2:  # cmd not found
+            raise Exception(
+                "Can't find command while trying to run %s" % splits)
         else:
             raise
 

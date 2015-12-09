@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
-from os import getcwd, pathsep, defpath, environ, walk, system
+from os import pathsep, defpath, environ, walk, system
 from os.path import exists, realpath, join, dirname
 from subprocess import check_output
 import fnmatch
 import re
 import argparse
+
 
 class ProtobufGenerator(object):
     def __init__(self, version):
@@ -19,15 +20,20 @@ class ProtobufGenerator(object):
         schemas = join(server, "../schemas")
 
         if not exists(schemas):
-            raise Exception, "Can't find schemas folder. Assumed it would be at %s" % realpath(schemas)
+            raise Exception(
+                "Can't find schemas folder. " +
+                "Assumed it would be at %s" % realpath(schemas))
 
         src = realpath(join(schemas, "src/main/resources"))
 
         if not exists(join(server, "proto")):
-            raise Exception, "Can't find destination python directory %s" % realpath(join(server, "proto"))
+            raise Exception(
+                "Can't find destination python directory %s"
+                % realpath(join(server, "proto")))
 
         if not exists(src):
-            raise Exception, "Can't find source proto directory %s" % realpath(src)
+            raise Exception(
+                "Can't find source proto directory %s" % realpath(src))
 
         def find_in_path(cmd):
             PATH = environ.get("PATH", defpath).split(pathsep)
@@ -40,10 +46,11 @@ class ProtobufGenerator(object):
         # From http://stackoverflow.com/a/1714190/320546
         def version_compare(version1, version2):
             def normalize(v):
-                return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]
+                return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]
             return cmp(normalize(version1), normalize(version2))
 
-        protocs = [realpath(x) for x in "%s/protobuf/src/protoc" % server, find_in_path("protoc") if x != None]
+        protocs = [realpath(x) for x in "%s/protobuf/src/protoc" % server,
+                   find_in_path("protoc") if x is not None]
         protoc = None
         for c in protocs:
             if not exists(c):
@@ -58,19 +65,23 @@ class ProtobufGenerator(object):
                 protoc = c
                 break
 
-            except Exception,e :
-                print "Not using %s because it returned '%s' rather than \"libprotoc <version>\", where <version> >= 3.0.0" % (c, output)
+            except Exception:
+                print "Not using %s because it returned " + \
+                    "'%s' rather than \"libprotoc <version>\", where " + \
+                    "<version> >= 3.0.0" % (c, output)
 
-        if protoc == None:
-            raise Exception, "Can't find a good protoc. Tried %s" % protocs
+        if protoc is None:
+            raise Exception("Can't find a good protoc. Tried %s" % protocs)
         print "Using %s for protoc" % protoc
 
         protos = []
         for root, dirs, files in walk(src):
-            protos.extend([join(root, f) for f in fnmatch.filter(files, "*.proto")])
+            protos.extend(
+                [join(root, f) for f in fnmatch.filter(files, "*.proto")])
         if len(protos) == 0:
-            raise Exception, "Didn't find any proto files in %s" % src
-        cmd = "%s -I %s --python_out=%s %s" % (protoc, src, server, " ".join(protos))
+            raise Exception("Didn't find any proto files in %s" % src)
+        cmd = "%s -I %s --python_out=%s %s" % \
+            (protoc, src, server, " ".join(protos))
         system(cmd)
 
         proto_folder = join(server, "proto")
@@ -79,6 +90,7 @@ class ProtobufGenerator(object):
             with file(join(root, "__init__.py"), "w") as f:
                 if root == proto_folder:
                     f.write("version = '%s'" % self.version)
+
 
 def main():
     parser = argparse.ArgumentParser(
