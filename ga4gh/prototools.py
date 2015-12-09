@@ -24,6 +24,7 @@ class PrototoolsException(Exception):
     Something that went wrong in the Prototools classes
     """
 
+
 class ProtoTool(object):
     """
     Base class for ProtoTool classes
@@ -38,6 +39,7 @@ class ProtoTool(object):
             message = "class '{}' is not subclass of Message".format(
                 self.class_.__name__)
             raise PrototoolsException(message)
+
 
 class Creator(ProtoTool):
     """
@@ -89,6 +91,7 @@ class Creator(ProtoTool):
         value = creator.getFieldValue(fieldName)
         return value
 
+
 class ProtoTypeSwitch(object):
     """
     Provides reusable logic for branching based on Proto types
@@ -112,10 +115,8 @@ class ProtoTypeSwitch(object):
         Return the value of a field of the class instantiated according
         to the rules defined by the subclass
         """
-        fieldType = None
         for field in self.schema.fields:
             if field.name == fieldName:
-                #fieldType = field.type
                 break
         value = self.handleField(field)
         return value
@@ -145,7 +146,7 @@ class ProtoTypeSwitch(object):
             descriptor.FieldDescriptor.TYPE_FLOAT: self.handleFloat,
             descriptor.FieldDescriptor.TYPE_DOUBLE: self.handleDouble,
             'fixed': self.handleFixed,
-            descriptor.FieldDescriptor.TYPE_ENUM : self.handleEnum,
+            descriptor.FieldDescriptor.TYPE_ENUM: self.handleEnum,
             'union': self.handleUnion,
             'error_union': self.handleErrorUnion,
             'error': self.handleError,
@@ -156,14 +157,17 @@ class ProtoTypeSwitch(object):
 
         if json_format._IsMapEntry(fieldDescriptor):
             return self._runField(fieldDescriptor, handler)
-        elif fieldDescriptor.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+        elif fieldDescriptor.label == \
+                descriptor.FieldDescriptor.LABEL_REPEATED:
             return [self._runField(fieldDescriptor, handler) for _ in range(2)]
         else:
             return self._runField(fieldDescriptor, handler)
 
     def _runField(self, fieldDescriptor, handler):
         if json_format._IsMapEntry(fieldDescriptor):
-            return {self.handleField(fieldDescriptor.message_type.fields[0]): self.handleField(fieldDescriptor.message_type.fields[1])}
+            return {
+                self.handleField(fieldDescriptor.message_type.fields[0]):
+                self.handleField(fieldDescriptor.message_type.fields[1])}
         elif fieldDescriptor.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
             return handler(fieldDescriptor.message_type)
         elif fieldDescriptor.type == descriptor.FieldDescriptor.TYPE_ENUM:
@@ -193,7 +197,7 @@ class ProtoTypeSwitch(object):
         components = []
         current = ""
         for c in camelStr:
-            if c.upper() == c: # new word
+            if c.upper() == c:  # new word
                 components.append(current.lower())
                 current = c
             else:
@@ -203,13 +207,16 @@ class ProtoTypeSwitch(object):
 
     def handleMessage(self, schema):
         message = {}
-        if schema.full_name == "google.protobuf.Value": # avoid nesting!
+        if schema.full_name == "google.protobuf.Value":  # avoid nesting!
             message["numberValue"] = self.handleDouble()
         else:
             for field in schema.fields:
-                name = self.toCamelCase(field.name) # Protobuf JSON import assumes camel case fields, which then get converted back to snake case...
+                # Protobuf JSON import assumes camel case fields, which then
+                # get converted back to snake case...
+                name = self.toCamelCase(field.name)
                 message[name] = self.handleSchema(field)
         return message
+
 
 class RandomInstanceCreator(ProtoTypeSwitch):
     """
@@ -263,6 +270,7 @@ class RandomInstanceCreator(ProtoTypeSwitch):
             (field.name, self.handleSchema(field.type))
             for field in schema.fields)
 
+
 class TypicalInstanceCreator(ProtoTypeSwitch):
     """
     Generates typical instances and values
@@ -309,6 +317,7 @@ class TypicalInstanceCreator(ProtoTypeSwitch):
             if memberSchema.type != 'null':
                 return self.handleSchema(memberSchema)
         raise PrototoolsException()  # should never happen
+
 
 class InvalidInstanceCreator(ProtoTypeSwitch):
     """
@@ -375,7 +384,9 @@ class DefaultInstanceCreator(TypicalInstanceCreator):
         defaultInstance = self.class_()
         jsonDict = protocol.toJsonDict(defaultInstance)
         for fieldName in defaultInstance.__slots__:
-            if fieldName in [f for f in defaultInstance.DESCRIPTOR.fields if f.label == descriptor.FieldDescriptor.LABEL_REQUIRED]:
+            if fieldName in [
+                    f for f in defaultInstance.DESCRIPTOR.fields
+                    if f.label == descriptor.FieldDescriptor.LABEL_REQUIRED]:
                 typicalValue = self.getFieldValue(fieldName)
                 jsonDict[fieldName] = typicalValue
         instance = protocol.fromJsonDict(jsonDict, self.class_)

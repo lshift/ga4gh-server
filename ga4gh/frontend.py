@@ -27,6 +27,7 @@ import ga4gh.backend as backend
 import ga4gh.datamodel as datamodel
 import ga4gh.protocol as protocol
 import ga4gh.exceptions as exceptions
+import proto
 
 
 MIMETYPE = "application/json"
@@ -102,7 +103,7 @@ class ServerStatus(object):
         """
         Returns the GA4GH protocol version we support.
         """
-        return protocol.version
+        return proto.version
 
     def getServerVersion(self):
         """

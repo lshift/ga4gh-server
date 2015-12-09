@@ -10,20 +10,19 @@ import json
 import inspect
 
 import google.protobuf.json_format as json_format
-from google.protobuf import reflection as reflection
+# from google.protobuf import reflection as reflection
 import google.protobuf.message as message
 
 import ga4gh.pb as pb
 
-from proto import version
-from proto.ga4gh.common_pb2 import *
-from proto.ga4gh.metadata_pb2 import *
-from proto.ga4gh.read_service_pb2 import *
-from proto.ga4gh.reads_pb2 import *
-from proto.ga4gh.reference_service_pb2 import *
-from proto.ga4gh.references_pb2 import *
-from proto.ga4gh.variant_service_pb2 import *
-from proto.ga4gh.variants_pb2 import *
+from proto.ga4gh.common_pb2 import *  # noqa
+from proto.ga4gh.metadata_pb2 import *  # noqa
+from proto.ga4gh.read_service_pb2 import *  # noqa
+from proto.ga4gh.reads_pb2 import *  # noqa
+from proto.ga4gh.reference_service_pb2 import *  # noqa
+from proto.ga4gh.references_pb2 import *  # noqa
+from proto.ga4gh.variant_service_pb2 import *  # noqa
+from proto.ga4gh.variants_pb2 import *  # noqa
 from proto.google.protobuf.struct_pb2 import Value
 
 # A map of response objects to the name of the attribute used to
@@ -58,29 +57,37 @@ def convertDatetime(t):
     millis = delta.total_seconds() * 1000
     return int(millis)
 
+
 def getValueFromValue(value):
     if type(value) != Value:
-        raise Exception, type(value)
+        raise Exception(type(value))
     if value.WhichOneof("kind") == None:
-        raise Exception, "Nothing set for %s" % value
+        raise Exception("Nothing set for %s" % value)
     return getattr(value, value.WhichOneof("kind"))
+
 
 def mergeLists(lists):
     return reduce(list.__add__, lists)
 
-def getDictFromMessageMap(messageMap):
-    return dict([(k, [getValueFromValue(x) for x in v.values]) for (k,v) in messageMap._values.items()])
 
-def toJson(protoObject, indent = 2):
+def getDictFromMessageMap(messageMap):
+    return dict([
+        (k, [getValueFromValue(x) for x in v.values])
+        for (k, v) in messageMap._values.items()])
+
+
+def toJson(protoObject, indent=2):
     """
     Serialises a proto-buf object as json
     """
     # Using the internal method because this way we can reformat the JSON
     js = json_format._MessageToJsonObject(protoObject, False)
-    return json.dumps(js, indent = indent)
+    return json.dumps(js, indent=indent)
+
 
 def fromJsonDict(jsonDict, protoClass):
     return fromJson(json.dumps(jsonDict), protoClass)
+
 
 def fromJson(json, protoClass):
     """
@@ -88,15 +95,19 @@ def fromJson(json, protoClass):
     """
     return json_format.Parse(json, protoClass())
 
+
 def toJsonDict(protoObject):
     return json.loads(toJson(protoObject))
 
+
 def validate(json, protoClass):
     try:
-        fromJson(json, protoClass) # The json conversion automatically validates
+        fromJson(json, protoClass)
+        # The json conversion automatically validates
         return True
-    except Exception, e:
+    except Exception:
         return False
+
 
 class SearchResponseBuilder(object):
     """
@@ -182,6 +193,7 @@ class SearchResponseBuilder(object):
         self._protoObject.next_page_token = pb.string(self._nextPageToken)
         s = toJson(self._protoObject)
         return s
+
 
 def getProtocolClasses(superclass=message.Message):
     """

@@ -134,7 +134,7 @@ class FormattedOutputRunner(AbstractQueryRunner):
         line.
         """
         for gaObject in gaObjects:
-            print(protocol.toJson(gaObject, indent = None))
+            print(protocol.toJson(gaObject, indent=None))
 
     def _textOutput(self, gaObjects):
         """

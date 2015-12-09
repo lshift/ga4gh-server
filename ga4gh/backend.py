@@ -31,7 +31,7 @@ def _parseIntegerArgument(args, key, defaultValue):
             except ValueError:
                 raise exceptions.BadRequestIntegerException(key, args[key])
     except TypeError:
-        raise Exception, (key, args)
+        raise Exception((key, args))
     return ret
 
 
@@ -77,7 +77,8 @@ class IntervalIterator(object):
         else:
             # Set the search start point and the number of records to skip from
             # the page token.
-            searchAnchor, objectsToSkip = _parsePageToken(request.page_token, 2)
+            searchAnchor, objectsToSkip = \
+                _parsePageToken(request.page_token, 2)
             self._pickUpIteration(searchAnchor, objectsToSkip)
 
     def _initialiseIteration(self):
@@ -499,7 +500,8 @@ class AbstractBackend(object):
         Returns a generator over the (variant, nextPageToken) pairs defined
         by the specified request.
         """
-        compoundId = datamodel.VariantSetCompoundId.parse(request.variant_set_id)
+        compoundId = datamodel.VariantSetCompoundId \
+            .parse(request.variant_set_id)
         dataset = self.getDataset(compoundId.datasetId)
         variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         intervalIterator = VariantsIntervalIterator(request, variantSet)
@@ -510,7 +512,8 @@ class AbstractBackend(object):
         Returns a generator over the (callSet, nextPageToken) pairs defined
         by the specified request.
         """
-        compoundId = datamodel.VariantSetCompoundId.parse(request.variant_set_id)
+        compoundId = datamodel.VariantSetCompoundId \
+            .parse(request.variant_set_id)
         dataset = self.getDataset(compoundId.datasetId)
         variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         if request.name is None:
@@ -594,7 +597,7 @@ class AbstractBackend(object):
         response = protocol.ListReferenceBasesResponse()
         response.offset = start
         response.sequence = sequence
-        if nextPageToken != None:
+        if nextPageToken is not None:
             response.next_page_token = nextPageToken
         return protocol.toJson(response)
 

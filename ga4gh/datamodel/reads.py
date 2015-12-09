@@ -16,6 +16,7 @@ import ga4gh.exceptions as exceptions
 import ga4gh.protocol as protocol
 import ga4gh.pb as pb
 
+
 def parseMalformedBamHeader(headerDict):
     """
     Parses the (probably) intended values out of the specified
@@ -132,10 +133,10 @@ class AbstractReadGroupSet(datamodel.DatamodelObject):
         """
         readGroupSet = protocol.ReadGroupSet()
         readGroupSet.id = self.getId()
-        readGroupSet.read_groups.extend([
-            readGroup.toProtocolElement()
-                for readGroup in self.getReadGroups()
-            ])
+        readGroupSet.read_groups.extend(
+            [readGroup.toProtocolElement()
+                for readGroup in self.getReadGroups()]
+        )
         readGroupSet.name = self.getLocalId()
         readGroupSet.dataset_id = self.getParentContainer().getId()
         stats = readGroupSet.stats
@@ -238,9 +239,11 @@ class HtslibReadGroupSet(datamodel.PysamDatamodelMixin, AbstractReadGroupSet):
             for htslibProgram in htslibPrograms:
                 program = protocol.ReadGroup.Program()
                 program.id = htslibProgram['ID']
-                program.command_line = htslibProgram.get('CL', pb.DEFAULT_STRING)
+                program.command_line = \
+                    htslibProgram.get('CL', pb.DEFAULT_STRING)
                 program.name = htslibProgram.get('PN', pb.DEFAULT_STRING)
-                program.prev_program_id = htslibProgram.get('PP', pb.DEFAULT_STRING)
+                program.prev_program_id = \
+                    htslibProgram.get('PP', pb.DEFAULT_STRING)
                 program.version = htslibProgram.get('VN', pb.DEFAULT_STRING)
                 programs.append(program)
         self._programs = programs
@@ -565,7 +568,7 @@ class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup):
         ret.fragment_length = read.template_length
         ret.fragment_name = read.query_name
         for key, value in read.tags:
-            ret.info[key].values.add(string_value = str(value))
+            ret.info[key].values.add(string_value=str(value))
         if read.next_reference_id != -1:
             ret.next_mate_position.reference_name = samFile.getrname(
                 read.next_reference_id)

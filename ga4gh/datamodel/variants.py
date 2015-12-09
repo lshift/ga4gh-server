@@ -23,7 +23,8 @@ def convertVCFPhaseset(vcfPhaseset):
     """
     Parses the VCF phaseset string
     """
-    if vcfPhaseset is not None and vcfPhaseset != "." and vcfPhaseset is not "":
+    if vcfPhaseset is not None and vcfPhaseset != "." \
+            and vcfPhaseset is not "":
         phaseset = vcfPhaseset
     else:
         phaseset = "*"
@@ -209,7 +210,8 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         Produces an MD5 hash of the ga variant object to uniquely
         identify it
         """
-        hash_str = gaVariant.reference_bases + str(tuple(gaVariant.alternate_bases))
+        hash_str = gaVariant.reference_bases + \
+            str(tuple(gaVariant.alternate_bases))
         return hashlib.md5(hash_str).hexdigest()
 
 
@@ -294,9 +296,9 @@ class SimulatedVariantSet(AbstractVariantSet):
 
 def _encodeValue(value):
     if isinstance(value, (list, tuple)):
-        return [Value(string_value = str(v)) for v in value]
+        return [Value(string_value=str(v)) for v in value]
     else:
-        return [Value(string_value = str(value))]
+        return [Value(string_value=str(value))]
 
 
 _nothing = object()
@@ -440,7 +442,8 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
                 genotypeData = sampleData[sampleIterator].split(
                     ":")[0]  # REMOVAL
                 gaCall = variant.calls.add()
-                self._convertGaCall(gaCall, record.id, name, call, genotypeData)  # REPLACE
+                self._convertGaCall(
+                    gaCall, record.id, name, call, genotypeData)  # REPLACE
             sampleIterator += 1  # REMOVAL
         variant.id = self.getVariantId(variant)
         return variant
