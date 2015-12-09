@@ -3,6 +3,14 @@ python:
   - "2.7"
 sudo: false
 
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - /home/travis/virtualenv/python2.7
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
 before_install:
   - wget 'http://www.well.ox.ac.uk/~jk/wheelhouse.tar'
   - tar -xvf wheelhouse.tar
