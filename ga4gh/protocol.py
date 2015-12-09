@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import datetime
 import json
+import inspect
 
 import google.protobuf.json_format as json_format
 from google.protobuf import reflection as reflection
