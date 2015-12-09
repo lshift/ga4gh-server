@@ -151,7 +151,7 @@ class EqualityTest(SchemaTest):
                         key = v.keys()[0]
                         snake_key = prototools.ProtoTypeSwitch.toSnakeCase(key)
                         new_values.append({snake_key: v[key]})
-                    new_item[x] = struct_pb2.ListValue(values = new_values)
+                    new_item[x] = struct_pb2.ListValue(values=new_values)
                 item[k] = new_item
             elif type(item[k]) == dict:
                 item[k] = self.snakeKeyDict(item[k], k_field)
@@ -181,19 +181,23 @@ class EqualityTest(SchemaTest):
                         print(field.full_name, test_val[0].keys())
                         print("snake test val")
                         pprint.pprint(snake_test_val)
-                        raise Exception, (e, field.message_type.full_name, type(repeated), [f.name for f in field.message_type.fields])
+                        raise Exception, \
+                            (e, field.message_type.full_name,
+                                type(repeated),
+                            [f.name for f in field.message_type.fields])
             elif hasattr(repeated, "get_or_create"):
                 v = repeated["bar"]
                 if type(v) == struct_pb2.Value:
                     v.string_value = "foo"
                 else:
-                    v.values.add(string_value = "foo")
+                    v.values.add(string_value="foo")
             else:
                 raise Exception, (type(repeated), dir(repeated))
         elif type(test_val) == dict:
             value = getattr(i1, field.name)
             for k in test_val.keys():
-                k_field = [f for f in field.message_type.fields if prototools.ProtoTypeSwitch.toCamelCase(f.name) == k][0]
+                k_field = [f for f in field.message_type.fields
+                    if prototools.ProtoTypeSwitch.toCamelCase(f.name) == k][0]
 
                 if k_field.type == descriptor.FieldDescriptor.TYPE_ENUM:
                     setattr(value, k_field.name, 2)
@@ -203,7 +207,6 @@ class EqualityTest(SchemaTest):
                     setattr(value, k_field.name, test_val[k])
         else:
             setattr(i1, field.name, test_val)
-
 
     """
     Tests equality is correctly calculated for different protocol elements.
@@ -229,7 +232,7 @@ class EqualityTest(SchemaTest):
                 test_val = r.handleField(field)
 
             self.setField(i1, field, test_val)
-            self.assertFalse(i1 == i2, (field.name, field.type, i1,i2))
+            self.assertFalse(i1 == i2, (field.name, field.type, i1, i2))
             self.assertTrue(i1 != i2)
 
     def testSameClasses(self):

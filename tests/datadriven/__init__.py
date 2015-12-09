@@ -115,14 +115,14 @@ class TestCase(object):
         """
         Tests that x is None.  If x is not, raise an assertion error.
         """
-        if x not in TestCase.consideredNone: # Protocol Buffers has default string as "", not None
+        if x not in TestCase.consideredNone:
             raise AssertionError("{} is not None".format(x))
 
     def assertIsNotNone(self, x):
         """
         Tests that x is not None.  If x is None, raise an assertion error.
         """
-        if x in TestCase.consideredNone: # Protocol Buffers has default string as "", not None
+        if x in TestCase.consideredNone:
             raise AssertionError("{} is None".format(x))
 
     def assertIn(self, a, b):

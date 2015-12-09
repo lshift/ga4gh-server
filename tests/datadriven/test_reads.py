@@ -361,7 +361,10 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
                 readGroupInfo.samFile.getrname(
                     pysamAlignment.next_reference_id))
         else:
-            self.assertEqual(gaAlignment.next_mate_position, common_pb2.Position()) # i.e. equal to empty object
+            # i.e. equal to empty object
+            self.assertEqual(
+                gaAlignment.next_mate_position,
+                common_pb2.Position())
         self.assertFlag(
             gaAlignment.proper_placement,
             pysamAlignment, reads.SamFlags.PROPER_PLACEMENT)

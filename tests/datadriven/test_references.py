@@ -85,7 +85,7 @@ class ReferenceSetTest(datadriven.DataDrivenTest):
         referenceSetPe = referenceSet.toProtocolElement()
         self.assertIsInstance(
             referenceSetPe, protocol.ReferenceSet)
-        #self.assertGreater(len(referenceSetPe.reference_ids), 0)
+        self.assertGreater(len(referenceSetPe.reference_ids), 0)
         for gaReference in referenceSet.getReferences():
             self.assertIsInstance(
                 gaReference.toProtocolElement(),

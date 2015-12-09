@@ -199,7 +199,7 @@ class TestFrontend(unittest.TestCase):
         ]
         for path in paths:
             response = self.app.get(path)
-            exception = protocol.fromJson(
+            protocol.fromJson(
                 response.get_data(), protocol.GAException)
             self.assertEqual(404, response.status_code)
 
@@ -232,12 +232,12 @@ class TestFrontend(unittest.TestCase):
         returns the correct status code.
         """
         response = self.app.post(path)
-        postException = protocol.fromJson(
+        protocol.fromJson(
             response.get_data(), protocol.GAException)
         self.assertEqual(415, response.status_code)
         if not getDefined:
             getResponse = self.app.get(path)
-            getException = protocol.fromJson(
+            protocol.fromJson(
                 getResponse.get_data(), protocol.GAException)
             self.assertEqual(405, getResponse.status_code)
 

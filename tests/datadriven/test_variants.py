@@ -352,7 +352,7 @@ class VariantSetTest(datadriven.DataDrivenTest):
         variantSet = self._gaObject
         start = 0
         end = datamodel.PysamDatamodelMixin.vcfMax
-        call_set_ids = [callSet.getId() for callSet in variantSet.getCallSets()]
+        call_set_ids = [cs.getId() for cs in variantSet.getCallSets()]
         somecall_set_ids = call_set_ids[0:3]
         for call_set_id in call_set_ids:
             returnedCallSet = variantSet.getCallSet(call_set_id)
@@ -429,6 +429,6 @@ class VariantSetTest(datadriven.DataDrivenTest):
         if record.ALT[0] is None:
             alts = tuple()
         else:
-            alts = tuple([unicode(substitution) for substitution in record.ALT])
-        hash_str = record.REF + str(alts)    
+            alts = tuple([unicode(sub) for sub in record.ALT])
+        hash_str = record.REF + str(alts)
         return hashlib.md5(hash_str).hexdigest()

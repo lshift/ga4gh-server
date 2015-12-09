@@ -78,8 +78,8 @@ class TestClientJson(TestClientOutput):
         for line in stdout.splitlines():
             try:
                 cliOutput.append(json.loads(line))
-            except ValueError,e:
-                raise Exception, (e,line, stdout, command, arguments)
+            except ValueError, e:
+                raise Exception, (e, line, stdout, command, arguments)
         return cliOutput
 
     def verifyParsedOutputsEqual(
@@ -90,7 +90,7 @@ class TestClientJson(TestClientOutput):
         CLI command.
         """
         cliOutput = self.captureJsonOutput(cliCommand, cliArguments)
-        clientOutput = [protocol.toJsonDict(gaObject) for gaObject in clientIterator]
+        clientOutput = [protocol.toJsonDict(gObj) for gObj in clientIterator]
         self.assertEqual(clientOutput, cliOutput)
 
     def testSearchAllDatasets(self):
