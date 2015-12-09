@@ -6,7 +6,7 @@ sudo: false
 cache:
   directories:
     - $HOME/.cache/pip
-    - /home/travis/virtualenv/python2.7
+    - $HOME/virtualenv/python2.7.9
     - protobuf/src/
 
 before_cache:
