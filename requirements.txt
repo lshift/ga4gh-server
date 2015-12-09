@@ -18,5 +18,8 @@ oic==0.7.6
 pyOpenSSL==0.15.1
 lxml==3.4.4
 CherryPy==3.8.0
-# protobuf>=3.0.0a3
+
+# FIXME: Switch to using this once released
+# protobuf>=3.0.0b1
+
 datetime

@@ -9,6 +9,9 @@ before_install:
 
 install:
   - pip install --use-wheel --find-links=wheelhouse/ -r requirements.txt
+  - cd protobuf/python
+  - python setup.py install
+  - cd ../../
   - python setup.py install
 
 before_script:
