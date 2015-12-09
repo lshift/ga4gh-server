@@ -467,7 +467,7 @@ class HttpClient(AbstractClient):
         urlSuffix = "references/{id}/bases".format(id=id_)
         url = posixpath.join(self._urlPrefix, urlSuffix)
         params = self._getHttpParameters()
-        params.update(protocol.toDict(request))
+        params.update(protocol.toJsonDict(request))
         response = self._session.get(url, params=params)
         self._checkResponseStatus(response)
         return self._deserializeResponse(
@@ -510,7 +510,7 @@ class LocalClient(AbstractClient):
         return self._deserializeResponse(responseJson, protocolResponseClass)
 
     def _runListReferenceBasesPageRequest(self, id_, request):
-        requestArgs = protocol.toDict(request)
+        requestArgs = protocol.toJsonDict(request)
         # We need to remove end from this dict if it's not specified because
         # of the way we're interacting with Flask and HTTP GET params.
         # TODO: This is a really nasty way of doing things; we really

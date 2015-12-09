@@ -9,6 +9,8 @@ import datetime
 import json
 
 import google.protobuf.json_format as json_format
+from google.protobuf import reflection as reflection
+import google.protobuf.message as message
 
 import ga4gh.pb as pb
 
@@ -76,21 +78,24 @@ def toJson(protoObject, indent = 2):
     js = json_format._MessageToJsonObject(protoObject, False)
     return json.dumps(js, indent = indent)
 
+def fromJsonDict(jsonDict, protoClass):
+    return fromJson(json.dumps(jsonDict), protoClass)
+
 def fromJson(json, protoClass):
     """
     Deserialise json into an instance of proto-buf class
     """
     return json_format.Parse(json, protoClass())
 
-def toDict(protoObject):
+def toJsonDict(protoObject):
     return json.loads(toJson(protoObject))
 
 def validate(json, protoClass):
     try:
         fromJson(json, protoClass) # The json conversion automatically validates
         return True
-    except Exception:
-        raise
+    except Exception, e:
+        return False
 
 class SearchResponseBuilder(object):
     """
@@ -176,3 +181,23 @@ class SearchResponseBuilder(object):
         self._protoObject.next_page_token = pb.string(self._nextPageToken)
         s = toJson(self._protoObject)
         return s
+
+def getProtocolClasses(superclass=message.Message):
+    """
+    Returns all the protocol classes that are subclasses of the
+    specified superclass. Only 'leaf' classes are returned,
+    corresponding directly to the classes defined in the protocol.
+    """
+    # We keep a manual list of the superclasses that we define here
+    # so we can filter them out when we're getting the protocol
+    # classes.
+    superclasses = set([
+        message.Message])
+    thisModule = sys.modules[__name__]
+    subclasses = []
+    for name, class_ in inspect.getmembers(thisModule):
+        if ((inspect.isclass(class_) and
+                issubclass(class_, superclass) and
+                class_ not in superclasses)):
+            subclasses.append(class_)
+    return subclasses

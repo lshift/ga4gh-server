@@ -90,7 +90,7 @@ class TestClientJson(TestClientOutput):
         CLI command.
         """
         cliOutput = self.captureJsonOutput(cliCommand, cliArguments)
-        clientOutput = [protocol.toDict(gaObject) for gaObject in clientIterator]
+        clientOutput = [protocol.toJsonDict(gaObject) for gaObject in clientIterator]
         self.assertEqual(clientOutput, cliOutput)
 
     def testSearchAllDatasets(self):

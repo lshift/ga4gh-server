@@ -8,12 +8,15 @@ from __future__ import unicode_literals
 import string
 import random
 import unittest
+import pprint
 
-import avro.schema
-
+import ga4gh.prototools as prototools
 import ga4gh.protocol as protocol
-# import ga4gh.avrotools as avrotools
 import tests.utils as utils
+
+import google.protobuf.descriptor as descriptor
+import google.protobuf.json_format as json_format
+import proto.google.protobuf.struct_pb2 as struct_pb2
 
 
 def randomString():
@@ -49,12 +52,12 @@ class SchemaTest(unittest.TestCase):
     #             field = fld
     #     return field
 
-    # def getInvalidValue(self, cls, fieldName):
-    #     """
-    #     Returns a value that should trigger a schema validation failure.
-    #     """
-    #     value = avrotools.Creator(cls).getInvalidField(fieldName)
-    #     return value
+    def getInvalidValue(self, cls, fieldName):
+        """
+        Returns a value that should trigger a schema validation failure.
+        """
+        value = prototools.Creator(cls).getInvalidField(fieldName)
+        return value
 
     def getTypicalValue(self, cls, fieldName):
         """
@@ -108,33 +111,100 @@ class SchemaTest(unittest.TestCase):
 
         return ret
 
-    # def getTypicalInstance(self, cls):
-    #     """
-    #     Returns a typical instance of the specified protocol class.
-    #     """
-    #     tool = avrotools.Creator(cls)
-    #     instance = tool.getTypicalInstance()
-    #     return instance
+    def getTypicalInstance(self, cls):
+        """
+        Returns a typical instance of the specified protocol class.
+        """
+        tool = prototools.Creator(cls)
+        instance = tool.getTypicalInstance()
+        return instance
 
-    # def getRandomInstance(self, cls):
-    #     """
-    #     Returns an instance of the specified class with randomly generated
-    #     values conforming to the schema.
-    #     """
-    #     tool = avrotools.Creator(cls)
-    #     instance = tool.getRandomInstance()
-    #     return instance
+    def getRandomInstance(self, cls):
+        """
+        Returns an instance of the specified class with randomly generated
+        values conforming to the schema.
+        """
+        tool = prototools.Creator(cls)
+        instance = tool.getRandomInstance()
+        return instance
 
-    # def getDefaultInstance(self, cls):
-    #     """
-    #     Returns a new instance with the required values set.
-    #     """
-    #     tool = avrotools.Creator(cls)
-    #     instance = tool.getDefaultInstance()
-    #     return instance
+    def getDefaultInstance(self, cls):
+        """
+        Returns a new instance with the required values set.
+        """
+        tool = prototools.Creator(cls)
+        instance = tool.getDefaultInstance()
+        return instance
 
 
 class EqualityTest(SchemaTest):
+    def snakeKeyDict(self, item, field):
+        snake_test_val = {}
+        for k in item.keys():
+            k_field = [f for f in field.message_type.fields if prototools.ProtoTypeSwitch.toCamelCase(f.name) == k][0]
+            if json_format._IsMapEntry(k_field):
+                new_item = {}
+                for x in item[k].keys():
+                    values = item[k][x]["values"]
+                    new_values = []
+                    for v in values:
+                        key = v.keys()[0]
+                        snake_key = prototools.ProtoTypeSwitch.toSnakeCase(key)
+                        new_values.append({snake_key: v[key]})
+                    new_item[x] = struct_pb2.ListValue(values = new_values)
+                item[k] = new_item
+            elif type(item[k]) == dict:
+                item[k] = self.snakeKeyDict(item[k], k_field)
+            elif type(item[k]) == list:
+                new_item = []
+                for i in item[k]:
+                    if type(i) == dict:
+                        new_item.append(self.snakeKeyDict(i, k_field))
+                    else:
+                        new_item.append(i)
+                item[k] = new_item
+
+            snake_test_val[k_field.name] = item[k]
+        return snake_test_val
+
+    def setField(self, i1, field, test_val):
+        if field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+            repeated = getattr(i1, field.name)
+            if hasattr(repeated, "append"):
+                repeated.extend(test_val)
+            elif hasattr(repeated, "add"):
+                for item in test_val:
+                    snake_test_val = self.snakeKeyDict(item, field)
+                    try:
+                        repeated.add(**snake_test_val)
+                    except Exception, e:
+                        print(field.full_name, test_val[0].keys())
+                        print("snake test val")
+                        pprint.pprint(snake_test_val)
+                        raise Exception, (e, field.message_type.full_name, type(repeated), [f.name for f in field.message_type.fields])
+            elif hasattr(repeated, "get_or_create"):
+                v = repeated["bar"]
+                if type(v) == struct_pb2.Value:
+                    v.string_value = "foo"
+                else:
+                    v.values.add(string_value = "foo")
+            else:
+                raise Exception, (type(repeated), dir(repeated))
+        elif type(test_val) == dict:
+            value = getattr(i1, field.name)
+            for k in test_val.keys():
+                k_field = [f for f in field.message_type.fields if prototools.ProtoTypeSwitch.toCamelCase(f.name) == k][0]
+
+                if k_field.type == descriptor.FieldDescriptor.TYPE_ENUM:
+                    setattr(value, k_field.name, 2)
+                elif k_field.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
+                    self.setField(value, k_field, test_val[k])
+                else:
+                    setattr(value, k_field.name, test_val[k])
+        else:
+            setattr(i1, field.name, test_val)
+
+
     """
     Tests equality is correctly calculated for different protocol elements.
     """
@@ -151,9 +221,15 @@ class EqualityTest(SchemaTest):
             self.assertFalse(val == i1)
             self.assertTrue(val != i1)
         # Now change an attribute on one and check if equality fails.
-        for field in i1.schema.fields:
-            setattr(i1, field.name, "value unique to i1")
-            self.assertFalse(i1 == i2)
+        r = prototools.RandomInstanceCreator(i1)
+        for field in i1.DESCRIPTOR.fields:
+            if field.type == descriptor.FieldDescriptor.TYPE_ENUM:
+                test_val = getattr(i1, field.name) + 1
+            else:
+                test_val = r.handleField(field)
+
+            self.setField(i1, field, test_val)
+            self.assertFalse(i1 == i2, (field.name, field.type, i1,i2))
             self.assertTrue(i1 != i2)
 
     def testSameClasses(self):
@@ -162,7 +238,7 @@ class EqualityTest(SchemaTest):
         for cls in protocol.getProtocolClasses():
             for factory in factories:
                 i1 = factory(cls)
-                i2 = cls.fromJsonDict(i1.toJsonDict())
+                i2 = protocol.fromJsonDict(protocol.toJsonDict(i1), cls)
                 self.verifyEqualityOperations(i1, i2)
 
     def testDifferentValues(self):
@@ -181,15 +257,15 @@ class EqualityTest(SchemaTest):
 
     def testDifferentLengthArrays(self):
         i1 = self.getTypicalInstance(protocol.CallSet)
-        i2 = protocol.CallSet.fromJsonDict(i1.toJsonDict())
-        i2.variantSetIds.append("extra")
+        i2 = protocol.fromJsonDict(protocol.toJsonDict(i1), protocol.CallSet)
+        i2.variant_set_ids.append("extra")
         self.assertFalse(i1 == i2)
 
     def testKeywordInstantiation(self):
         for cls in protocol.getProtocolClasses():
             kwargs = {}
             instance = self.getDefaultInstance(cls)
-            for key in instance.toJsonDict().keys():
+            for key in protocol.toJsonDict(instance).keys():
                 val = getattr(instance, key)
                 kwargs[key] = val
             secondInstance = cls(**kwargs)
@@ -207,8 +283,8 @@ class SerialisationTest(SchemaTest):
             otherInstance = protocol.fromJson(jsonStr, cls)
             self.assertEqual(instance, otherInstance)
 
-            jsonDict = instance.toJsonDict()
-            otherInstance = cls.fromJsonDict(jsonDict)
+            jsonDict = protocol.toJsonDict(instance)
+            otherInstance = protocol.fromJsonDict(jsonDict, cls)
             self.assertEqual(instance, otherInstance)
 
     def testSerialiseDefaultValues(self):
@@ -230,8 +306,8 @@ class ValidatorTest(SchemaTest):
     def validateClasses(self, factory):
         for cls in protocol.getProtocolClasses():
             instance = factory(cls)
-            jsonDict = instance.toJsonDict()
-            self.assertTrue(cls.validate(jsonDict))
+            jsonDict = protocol.toJson(instance)
+            self.assertTrue(protocol.validate(jsonDict, cls))
 
     def testValidateDefaultValues(self):
         self.validateClasses(self.getDefaultInstance)
@@ -245,21 +321,21 @@ class ValidatorTest(SchemaTest):
     def testValidateBadValues(self):
         for cls in protocol.getProtocolClasses():
             instance = self.getTypicalInstance(cls)
-            jsonDict = instance.toJsonDict()
-            self.assertFalse(cls.validate(None))
-            self.assertFalse(cls.validate([]))
-            self.assertFalse(cls.validate(1))
+            jsonDict = protocol.toJsonDict(instance)
+            self.assertFalse(protocol.validate(None, cls))
+            self.assertFalse(protocol.validate([], cls))
+            self.assertFalse(protocol.validate(1, cls))
             # setting values to bad values should be invalid
             for key in jsonDict.keys():
                 dct = dict(jsonDict)
                 dct[key] = self.getInvalidValue(cls, key)
-                self.assertFalse(cls.validate(dct))
+                self.assertFalse(protocol.validate(dct, cls))
             for c in utils.powerset(jsonDict.keys(), 10):
                 if len(c) > 0:
                     dct = dict(jsonDict)
                     for f in c:
                         dct[f] = self.getInvalidValue(cls, f)
-                    self.assertFalse(cls.validate(dct))
+                    self.assertFalse(protocol.validate(dct, cls))
 
 
 class GetProtocolClassesTest(SchemaTest):
@@ -271,8 +347,9 @@ class GetProtocolClassesTest(SchemaTest):
         classes = protocol.getProtocolClasses()
         self.assertGreater(len(classes), 0)
         for class_ in classes:
-            self.assertTrue(issubclass(class_, protocol.ProtocolElement))
+            self.assertTrue(issubclass(class_, protocol.message.Message))
 
+    @unittest.skip("Protoc doesn't allow for the customisation Avro did")
     def testRequestAndResponseClasses(self):
         requestClasses = protocol.getProtocolClasses(protocol.SearchRequest)
         responseClasses = protocol.getProtocolClasses(protocol.SearchResponse)
@@ -286,6 +363,7 @@ class GetProtocolClassesTest(SchemaTest):
             self.assertGreater(len(valueListName), 0)
 
 
+@unittest.skip("Protocol buffers don't have embedded types")
 class EmbeddedValuesTest(SchemaTest):
     """
     Tests for the embedded values maps in ProtocolElements.
@@ -305,6 +383,7 @@ class SearchResponseBuilderTest(SchemaTest):
     Tests the SearchResponseBuilder class to ensure that it behaves
     correctly.
     """
+    @unittest.skip("Protoc doesn't allow for the customisation Avro did")
     def testIntegrity(self):
         # Verifies that the values we put in are exactly what we get
         # back across all subclasses of SearchResponse
@@ -323,6 +402,7 @@ class SearchResponseBuilderTest(SchemaTest):
                     builder.getSerializedResponse(), class_)
                 self.assertEqual(instance,  otherInstance)
 
+    @unittest.skip("don't support getValueListName")
     def testPageSizeOverflow(self):
         # Verifies that the page size behaviour is correct when we keep
         # filling after full is True.
@@ -345,6 +425,7 @@ class SearchResponseBuilderTest(SchemaTest):
                 else:
                     self.assertTrue(builder.isFull())
 
+    @unittest.skip("don't support getValueListName")
     def testPageSizeExactFill(self):
         responseClass = protocol.SearchVariantsResponse
         valueClass = protocol.Variant
@@ -359,11 +440,12 @@ class SearchResponseBuilderTest(SchemaTest):
             valueList = getattr(instance, responseClass.getValueListName())
             self.assertEqual(len(valueList), pageSize)
 
+    @unittest.skip("don't support getValueListName")
     def testMaxResponseLengthOverridesPageSize(self):
         responseClass = protocol.SearchVariantsResponse
         valueClass = protocol.Variant
         typicalValue = self.getTypicalInstance(valueClass)
-        typicalValueLength = len(typicalValue.toJsonString())
+        typicalValueLength = len(protocol.toJson(typicalValue))
         for numValues in range(1, 10):
             maxResponseLength = numValues * typicalValueLength
             builder = protocol.SearchResponseBuilder(
@@ -385,11 +467,11 @@ class SearchResponseBuilderTest(SchemaTest):
         self.assertIsNone(builder.getNextPageToken())
         instance = protocol.fromJson(
             builder.getSerializedResponse(), responseClass)
-        self.assertIsNone(instance.nextPageToken)
+        self.assertEqual("", instance.next_page_token)
         # page tokens can be None or any string.
-        for nextPageToken in [None, "", "string"]:
+        for nextPageToken in ["", "string"]:
             builder.setNextPageToken(nextPageToken)
             self.assertEqual(nextPageToken, builder.getNextPageToken())
             instance = protocol.fromJson(
                 builder.getSerializedResponse(), responseClass)
-            self.assertEqual(nextPageToken, instance.nextPageToken)
+            self.assertEqual(nextPageToken, instance.next_page_token)
