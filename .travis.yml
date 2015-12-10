@@ -40,6 +40,6 @@ script:
   - flake8 *.py tests ga4gh scripts --exclude=ez_setup.py
   - nosetests --with-coverage --cover-package ga4gh
               --cover-inclusive --cover-min-percentage 85
-              --cover-branches --cover-erase
+              --cover-branches --cover-erase -v
   - make clean -C docs
   - make -C docs
