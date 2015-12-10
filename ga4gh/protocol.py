@@ -81,7 +81,7 @@ def toJson(protoObject, indent=2):
     Serialises a proto-buf object as json
     """
     # Using the internal method because this way we can reformat the JSON
-    js = json_format._MessageToJsonObject(protoObject, False)
+    js = json_format._MessageToJsonObject(protoObject, True)
     return json.dumps(js, indent=indent)
 
 

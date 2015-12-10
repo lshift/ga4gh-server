@@ -252,7 +252,7 @@ class DummyRequestsSession(object):
             args = dict(params)
             if args['end'] is None:
                 del args['end']
-            if args['pageToken'] is None:
+            if args['pageToken'] is "":
                 del args['pageToken']
             result = self._backend.runListReferenceBases(id_, args)
         else:
@@ -381,7 +381,7 @@ class ExhaustiveListingsMixin(object):
                     readGroupSets, datamodelReadGroupSets):
                 datamodelReadGroups = datamodelReadGroupSet.getReadGroups()
                 self.verifyObjectList(
-                    readGroupSet.readGroups, datamodelReadGroups,
+                    readGroupSet.read_groups, datamodelReadGroups,
                     self.client.getReadGroup)
 
     def testAllReads(self):
