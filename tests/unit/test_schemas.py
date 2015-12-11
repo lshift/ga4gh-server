@@ -409,7 +409,6 @@ class SearchResponseBuilderTest(SchemaTest):
                     builder.getSerializedResponse(), class_)
                 self.assertEqual(instance,  otherInstance)
 
-    @unittest.skip("don't support getValueListName")
     def testPageSizeOverflow(self):
         # Verifies that the page size behaviour is correct when we keep
         # filling after full is True.
@@ -425,14 +424,13 @@ class SearchResponseBuilderTest(SchemaTest):
                 instance = protocol.fromJson(
                     builder.getSerializedResponse(), responseClass)
                 valueList = getattr(
-                    instance, responseClass.getValueListName())
+                    instance, protocol.getValueListName(responseClass))
                 self.assertEqual(len(valueList), listLength)
                 if listLength < pageSize:
                     self.assertFalse(builder.isFull())
                 else:
                     self.assertTrue(builder.isFull())
 
-    @unittest.skip("don't support getValueListName")
     def testPageSizeExactFill(self):
         responseClass = protocol.SearchVariantsResponse
         valueClass = protocol.Variant
@@ -444,10 +442,9 @@ class SearchResponseBuilderTest(SchemaTest):
                 builder.addValue(self.getTypicalInstance(valueClass))
             instance = protocol.fromJson(
                 builder.getSerializedResponse(), responseClass)
-            valueList = getattr(instance, responseClass.getValueListName())
+            valueList = getattr(instance, protocol.getValueListName(responseClass))
             self.assertEqual(len(valueList), pageSize)
 
-    @unittest.skip("don't support getValueListName")
     def testMaxResponseLengthOverridesPageSize(self):
         responseClass = protocol.SearchVariantsResponse
         valueClass = protocol.Variant
@@ -463,7 +460,7 @@ class SearchResponseBuilderTest(SchemaTest):
                 builder.addValue(typicalValue)
             instance = protocol.fromJson(
                 builder.getSerializedResponse(), responseClass)
-            valueList = getattr(instance, responseClass.getValueListName())
+            valueList = getattr(instance, protocol.getValueListName(responseClass))
             self.assertEqual(len(valueList), numValues)
 
     def testNextPageToken(self):
