@@ -217,7 +217,7 @@ class DatasetCompoundId(CompoundId):
     The compound id for a data set
     """
     fields = ['dataset']
-    containerIds = [('datasetId', 0)]
+    containerIds = [('dataset_id', 0)]
 
 
 class VariantSetCompoundId(DatasetCompoundId):

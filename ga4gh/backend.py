@@ -486,7 +486,7 @@ class AbstractBackend(object):
                 "Exactly one read group id must be specified")
         compoundId = datamodel.ReadGroupCompoundId.parse(
             request.read_group_ids[0])
-        dataset = self.getDataset(compoundId.datasetId)
+        dataset = self.getDataset(compoundId.dataset_id)
         readGroupSet = dataset.getReadGroupSet(compoundId.read_group_set_id)
         readGroup = readGroupSet.getReadGroup(compoundId.read_group_id)
         # Find the reference.
@@ -502,7 +502,7 @@ class AbstractBackend(object):
         """
         compoundId = datamodel.VariantSetCompoundId \
             .parse(request.variant_set_id)
-        dataset = self.getDataset(compoundId.datasetId)
+        dataset = self.getDataset(compoundId.dataset_id)
         variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         intervalIterator = VariantsIntervalIterator(request, variantSet)
         return intervalIterator
@@ -514,7 +514,7 @@ class AbstractBackend(object):
         """
         compoundId = datamodel.VariantSetCompoundId \
             .parse(request.variant_set_id)
-        dataset = self.getDataset(compoundId.datasetId)
+        dataset = self.getDataset(compoundId.dataset_id)
         variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         if request.name is None:
             return self._topLevelObjectGenerator(
@@ -608,7 +608,7 @@ class AbstractBackend(object):
         Returns a callset with the given id
         """
         compoundId = datamodel.CallSetCompoundId.parse(id_)
-        dataset = self.getDataset(compoundId.datasetId)
+        dataset = self.getDataset(compoundId.dataset_id)
         variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         callSet = variantSet.getCallSet(id_)
         return self.runGetRequest(callSet)
@@ -618,7 +618,7 @@ class AbstractBackend(object):
         Returns a variant with the given id
         """
         compoundId = datamodel.VariantCompoundId.parse(id_)
-        dataset = self.getDataset(compoundId.datasetId)
+        dataset = self.getDataset(compoundId.dataset_id)
         variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         gaVariant = variantSet.getVariant(compoundId)
         # TODO variant is a special case here, as it's returning a
@@ -632,7 +632,7 @@ class AbstractBackend(object):
         Returns a readGroupSet with the given id_
         """
         compoundId = datamodel.ReadGroupSetCompoundId.parse(id_)
-        dataset = self.getDataset(compoundId.datasetId)
+        dataset = self.getDataset(compoundId.dataset_id)
         readGroupSet = dataset.getReadGroupSet(id_)
         return self.runGetRequest(readGroupSet)
 
@@ -641,7 +641,7 @@ class AbstractBackend(object):
         Returns a read group with the given id_
         """
         compoundId = datamodel.ReadGroupCompoundId.parse(id_)
-        dataset = self.getDataset(compoundId.datasetId)
+        dataset = self.getDataset(compoundId.dataset_id)
         readGroupSet = dataset.getReadGroupSet(compoundId.read_group_set_id)
         readGroup = readGroupSet.getReadGroup(id_)
         return self.runGetRequest(readGroup)
@@ -667,7 +667,7 @@ class AbstractBackend(object):
         Runs a getVariantSet request for the specified ID.
         """
         compoundId = datamodel.VariantSetCompoundId.parse(id_)
-        dataset = self.getDataset(compoundId.datasetId)
+        dataset = self.getDataset(compoundId.dataset_id)
         variantSet = dataset.getVariantSet(id_)
         return self.runGetRequest(variantSet)
 
