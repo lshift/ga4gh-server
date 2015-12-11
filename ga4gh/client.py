@@ -516,10 +516,10 @@ class LocalClient(AbstractClient):
         # TODO: This is a really nasty way of doing things; we really
         # should just have a request object and pass that around instead of an
         # arguments dictionary.
-        if request.end is None:
+        if request.end is 0:
             del requestArgs["end"]
-        if request.page_token is None:
-            del requestArgs["page_token"]
+        if request.page_token == '':
+            del requestArgs["pageToken"]
         responseJson = self._backend.runListReferenceBases(id_, requestArgs)
         return self._deserializeResponse(
             responseJson, protocol.ListReferenceBasesResponse)
