@@ -413,7 +413,7 @@ class AbstractBackend(object):
         defined by the specified request.
         """
         dataset = self.getDataset(request.dataset_id)
-        if not request.name:
+        if request.name == "":
             return self._topLevelObjectGenerator(
                 request, dataset.getNumReadGroupSets(),
                 dataset.getReadGroupSetByIndex)

@@ -56,7 +56,7 @@ class TestSimulatedStack(unittest.TestCase):
         Returns a list of IDs that should not exist in the server and should
         raise a 404 error.
         """
-        return ["", "1234:", "x"*100, ":", ":xx", "::", ":::", "::::"]
+        return ["1234:", "x"*100, ":", ":xx", "::", ":::", "::::"]
 
     def sendJsonPostRequest(self, path, data):
         """
@@ -129,12 +129,12 @@ class TestSimulatedStack(unittest.TestCase):
     def verifyReadGroupSetsEqual(self, gaReadGroupSet, readGroupSet):
         dataset = readGroupSet.getParentContainer()
         self.assertEqual(gaReadGroupSet.id, readGroupSet.getId())
-        self.assertEqual(gaReadGroupSet.datasetId, dataset.getId())
+        self.assertEqual(gaReadGroupSet.dataset_id, dataset.getId())
         self.assertEqual(gaReadGroupSet.name, readGroupSet.getLocalId())
         self.assertEqual(
-            len(gaReadGroupSet.readGroups), len(readGroupSet.getReadGroups()))
+            len(gaReadGroupSet.read_groups), len(readGroupSet.getReadGroups()))
         for gaReadGroup, readGroup in zip(
-                gaReadGroupSet.readGroups, readGroupSet.getReadGroups()):
+                gaReadGroupSet.read_groups, readGroupSet.getReadGroups()):
             self.verifyReadGroupsEqual(gaReadGroup, readGroup)
 
     def verifyReadGroupsEqual(self, gaReadGroup, readGroup):
@@ -200,8 +200,8 @@ class TestSimulatedStack(unittest.TestCase):
         results.
         """
         responseData = self.sendSearchRequest(path, request, responseClass)
-        self.assertIsNone(responseData.nextPageToken)
-        responseList = getattr(responseData, responseClass.getValueListName())
+        self.assertEqual("", responseData.next_page_token)
+        responseList = getattr(responseData, protocol.getValueListName(responseClass))
         self.assertEqual(0, len(responseList))
 
     def assertObjectNotFound(self, response):
@@ -218,7 +218,7 @@ class TestSimulatedStack(unittest.TestCase):
         """
         Verify that the specified search request fails with a 404.
         """
-        response = self.sendJsonPostRequest(path, request.toJsonString())
+        response = self.sendJsonPostRequest(path, protocol.toJson(request))
         self.assertObjectNotFound(response)
 
     def verifyGetMethodFails(self, path, id_):
@@ -256,7 +256,7 @@ class TestSimulatedStack(unittest.TestCase):
                 self.verifyVariantSetsEqual)
         for badId in self.getBadIds():
             request = protocol.SearchVariantSetsRequest()
-            request.datasetId = badId
+            request.dataset_id = badId
             self.verifySearchMethodFails(request, path)
 
     def testCallSetsSearch(self):
@@ -296,14 +296,14 @@ class TestSimulatedStack(unittest.TestCase):
         for dataset in self.backend.getDatasets():
             readGroupSets = dataset.getReadGroupSets()
             request = protocol.SearchReadGroupSetsRequest()
-            request.datasetId = dataset.getId()
+            request.dataset_id = dataset.getId()
             self.verifySearchMethod(
                 request, path, protocol.SearchReadGroupSetsResponse,
                 readGroupSets, self.verifyReadGroupSetsEqual)
             # Check if we can search for the readGroupSet with a good name.
             for readGroupSet in readGroupSets:
                 request = protocol.SearchReadGroupSetsRequest()
-                request.datasetId = dataset.getId()
+                request.dataset_id = dataset.getId()
                 request.name = readGroupSet.getLocalId()
                 self.verifySearchMethod(
                     request, path, protocol.SearchReadGroupSetsResponse,
@@ -311,13 +311,13 @@ class TestSimulatedStack(unittest.TestCase):
             # Check if we can search for the readGroupSet with a bad name.
             for badId in self.getBadIds():
                 request = protocol.SearchReadGroupSetsRequest()
-                request.datasetId = dataset.getId()
+                request.dataset_id = dataset.getId()
                 request.name = badId
                 self.verifySearchResultsEmpty(
                     request, path, protocol.SearchReadGroupSetsResponse)
         for badId in self.getBadIds():
             request = protocol.SearchReadGroupSetsRequest()
-            request.datasetId = badId
+            request.dataset_id = badId
             self.verifySearchMethodFails(request, path)
 
     def testReferenceSetsSearch(self):
@@ -339,7 +339,7 @@ class TestSimulatedStack(unittest.TestCase):
                 self.verifyReferencesEqual)
         for badId in self.getBadIds():
             request = protocol.SearchReferencesRequest()
-            request.referenceSetId = badId
+            request.reference_set_id = badId
             self.verifySearchMethodFails(request, path)
 
     def verifyReferenceSearchFilters(
@@ -356,16 +356,16 @@ class TestSimulatedStack(unittest.TestCase):
             request.md5checksum = obj.getMd5Checksum()
             self.verifySearchMethod(
                 request, path, responseClass, [obj], objectVerifier)
-            request.md5checksum = None
+            request.md5checksum = ""
             request.accession = obj.getSourceAccessions()[0]
             self.verifySearchMethod(
                 request, path, responseClass, [obj], objectVerifier)
-            request.accession = None
+            request.accession = ""
             if hasAssemblyId:
-                request.assemblyId = obj.getAssemblyId()
+                request.assembly_id = obj.getAssemblyId()
                 self.verifySearchMethod(
                     request, path, responseClass, [obj], objectVerifier)
-                request.assemblyId = None
+                request.assembly_id = ""
             # Now check one good value and some bad values.
             request.md5checksum = obj.getMd5Checksum()
             badAccessions = [
@@ -373,14 +373,14 @@ class TestSimulatedStack(unittest.TestCase):
             for accession in badAccessions:
                 request.accession = accession
                 self.verifySearchResultsEmpty(request, path, responseClass)
-            request.accession = None
+            request.accession = ""
             if hasAssemblyId:
                 badAssemblyIds = [
                     "no such asssembly", objectList[0].getAssemblyId()]
                 for assemblyId in badAssemblyIds:
-                    request.assemblyId = assemblyId
+                    request.assembly_id = assemblyId
                     self.verifySearchResultsEmpty(request, path, responseClass)
-                request.assemblyId = None
+                request.assembly_id = ""
 
     def testReferencesSearchFilters(self):
         path = '/references/search'
@@ -613,8 +613,8 @@ class TestSimulatedStack(unittest.TestCase):
                     for readGroup in readGroupSet.getReadGroups():
                         # search reads
                         request = protocol.SearchReadsRequest()
-                        request.readGroupIds = [readGroup.getId()]
-                        request.referenceId = reference.getId()
+                        request.read_group_ids.append(readGroup.getId())
+                        request.reference_id = reference.getId()
                         responseData = self.sendSearchRequest(
                             path, request, protocol.SearchReadsResponse)
                         alignments = responseData.alignments
@@ -622,4 +622,4 @@ class TestSimulatedStack(unittest.TestCase):
                         for alignment in alignments:
                             # TODO more tests here: this is very weak.
                             self.assertEqual(
-                                alignment.readGroupId, readGroup.getId())
+                                alignment.read_group_id, readGroup.getId())
