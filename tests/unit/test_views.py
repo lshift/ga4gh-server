@@ -80,10 +80,10 @@ class TestFrontend(unittest.TestCase):
     def sendVariantsSearch(self):
         response = self.sendVariantSetsSearch()
         variantSets = protocol.fromJson(
-            response.data, protocol.SearchVariantSetsResponse).variantSets
+            response.data, protocol.SearchVariantSetsResponse).variant_sets
         request = protocol.SearchVariantsRequest()
-        request.variantSetId = variantSets[0].id
-        request.referenceName = "1"
+        request.variant_set_id = variantSets[0].id
+        request.reference_name = "1"
         request.start = 0
         request.end = 1
         return self.sendPostRequest('/variants/search', request)
@@ -96,7 +96,7 @@ class TestFrontend(unittest.TestCase):
     def sendCallSetsSearch(self):
         response = self.sendVariantSetsSearch()
         variantSets = protocol.fromJson(
-            response.data, protocol.SearchVariantSetsResponse).variantSets
+            response.data, protocol.SearchVariantSetsResponse).variant_sets
         request = protocol.SearchCallSetsRequest()
         request.variant_set_id = variantSets[0].id
         return self.sendPostRequest('/callsets/search', request)
@@ -105,8 +105,8 @@ class TestFrontend(unittest.TestCase):
         if readGroupIds is None:
             readGroupIds = [self.readGroupId]
         request = protocol.SearchReadsRequest()
-        request.readGroupIds = readGroupIds
-        request.referenceId = self.referenceId
+        request.read_group_ids.extend(readGroupIds)
+        request.reference_id = self.referenceId
         return self.sendPostRequest('/reads/search', request)
 
     def sendDatasetsSearch(self):
@@ -179,7 +179,7 @@ class TestFrontend(unittest.TestCase):
         headers = {
             'Origin': self.exampleUrl,
         }
-        data = request.toJsonDict()
+        data = protocol.toJsonDict(request)
         response = self.app.get(path, data=data, headers=headers)
         return response
 
@@ -299,7 +299,7 @@ class TestFrontend(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         responseData = protocol.fromJson(
             response.data, protocol.SearchVariantSetsResponse)
-        self.assertEqual(len(responseData.variantSets), 1)
+        self.assertEqual(len(responseData.variant_sets), 1)
 
     def testGetDataset(self):
         # Test OK: ID found
@@ -320,7 +320,7 @@ class TestFrontend(unittest.TestCase):
         response = self.sendVariantSetsSearch()
         responseData = protocol.fromJson(
             response.data, protocol.SearchVariantSetsResponse)
-        variantSetId = responseData.variantSets[0].id
+        variantSetId = responseData.variant_sets[0].id
         response = self.sendGetVariantSet(variantSetId)
         self.assertEqual(200, response.status_code)
         obfuscated = datamodel.CompoundId.obfuscate("notValid:notValid")
@@ -358,7 +358,7 @@ class TestFrontend(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         responseData = protocol.fromJson(
             response.data, protocol.SearchCallSetsResponse)
-        self.assertEqual(len(responseData.callSets), 1)
+        self.assertEqual(len(responseData.call_sets), 1)
 
     def testReadsSearch(self):
         response = self.sendReadsSearch()
