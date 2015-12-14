@@ -585,7 +585,12 @@ class TestSimulatedStack(unittest.TestCase):
                 self.assertEqual(response.sequence, sequence[:pageSize])
                 self.assertEqual(response.offset, start)
                 sequenceFragments = [response.sequence]
-                while response.next_page_token is not None:
+                i = 0
+                while response.next_page_token is not "":
+                    i +=1
+                    print("npt", response.next_page_token)
+                    if i == 5:
+                        raise Exception, "\"%s\""%type(response.next_page_token)
                     args = protocol.ListReferenceBasesRequest()
                     args.page_token = response.next_page_token
                     args.start, args.end = start, end
