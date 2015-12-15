@@ -97,9 +97,9 @@ GA4GH reference server:
 This will take a little time as the libraries that we require are
 fetched from PyPI and built.
 
-**************
+********************
 Configuring protobuf
-**************
+********************
 
 * git submodule update --init
 * cd protobuf/python
