@@ -203,4 +203,4 @@ class TestReadsIntervalIteratorClassMethods(unittest.TestCase):
         result = self.intervalIterator._getEnd(self.read)
         self.assertEqual(
             self.intervalIterator._getStart(self.read) +
-            len(self.read.alignedSequence), result)
+            len(self.read.aligned_sequence), result)

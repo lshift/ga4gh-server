@@ -14,6 +14,7 @@ import ga4gh.datamodel.variants as variants
 import ga4gh.exceptions as exceptions
 import ga4gh.protocol as protocol
 import ga4gh.backend as backend
+import proto
 
 
 class FaultyVariantDataTest(unittest.TestCase):
@@ -96,7 +97,7 @@ class TestDuplicateCallSetId(FaultyVariantDataTest):
     """
     localIds = ["duplicated_sampleid"]
 
-    @unittest.skipIf(protocol.version.startswith("0.6"), "")
+    @unittest.skipIf(proto.version.startswith("0.6"), "")
     def testInstantiation(self):
         for localId in self.localIds:
             path = self.getFullPath(localId)

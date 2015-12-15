@@ -66,25 +66,29 @@ class TestFrontendErrors(unittest.TestCase):
         corresponding to the specified exception class.
         """
         self.assertRawRequestRaises(
-            exceptionClass, url, request.toJsonString())
+            exceptionClass, url, protocol.toJson(request))
+
 
     def testPageSize(self):
         for url, requestClass in self.endPointMap.items():
-            for badType in ["", "1", "None", 0.0, 1e3]:
-                request = requestClass()
-                request.pageSize = badType
-                self.assertRequestRaises(
-                    exceptions.RequestValidationFailureException, url, request)
+            # # Gets caught by the protocol buffer checkers
+            # for badType in ["", "1", "None", 0.0, 1e3]:
+            #     request = requestClass()
+            #     request.page_size = badType
+            #     self.assertRequestRaises(
+            #         exceptions.RequestValidationFailureException, url, request)
+
             for badSize in [-100, -1, 0]:
                 request = requestClass()
-                request.pageSize = badSize
+                request.page_size = badSize
                 self.assertRequestRaises(
                     exceptions.BadPageSizeException, url, request)
 
+    @unittest.skip("Gets caught by the protocol buffer checkers")
     def testPageToken(self):
         for url, requestClass in self.endPointMap.items():
             for badType in [0, 0.0, 1e-3, {}, [], [None]]:
                 request = requestClass()
-                request.pageToken = badType
+                request.page_token = badType
                 self.assertRequestRaises(
                     exceptions.RequestValidationFailureException, url, request)

@@ -32,7 +32,7 @@ class ProtoTool(object):
     def __init__(self, class_):
         self.class_ = class_
         self.assertProtocolSubclass()
-        self.schema = class_.schema
+        self.schema = class_.DESCRIPTOR
 
     def assertProtocolSubclass(self):
         if not issubclass(self.class_, protocol.message.Message):
@@ -391,3 +391,9 @@ class DefaultInstanceCreator(TypicalInstanceCreator):
                 jsonDict[fieldName] = typicalValue
         instance = protocol.fromJsonDict(jsonDict, self.class_)
         return instance
+
+class Validator(ProtoTool):
+    def getInvalidFields(self, jsonDict):
+        # FIXME: get the proper list of fields
+        protocol.fromJsonDict(jsonDict, self.class_)
+        return []

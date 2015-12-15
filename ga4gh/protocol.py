@@ -23,7 +23,7 @@ from proto.ga4gh.reference_service_pb2 import *  # noqa
 from proto.ga4gh.references_pb2 import *  # noqa
 from proto.ga4gh.variant_service_pb2 import *  # noqa
 from proto.ga4gh.variants_pb2 import *  # noqa
-from proto.google.protobuf.struct_pb2 import Value
+import proto.google.protobuf.struct_pb2 as struct_pb2
 
 # A map of response objects to the name of the attribute used to
 # store the values returned.
@@ -59,7 +59,7 @@ def convertDatetime(t):
 
 
 def getValueFromValue(value):
-    if type(value) != Value:
+    if type(value) != struct_pb2.Value:
         raise Exception(type(value))
     if value.WhichOneof("kind") == None:
         raise Exception("Nothing set for %s" % value)
@@ -214,3 +214,29 @@ def getProtocolClasses(superclass=message.Message):
                 class_ not in superclasses)):
             subclasses.append(class_)
     return subclasses
+
+postMethods = \
+    [('/callsets/search',
+      SearchCallSetsRequest,
+      SearchCallSetsResponse),
+     ('/datasets/search',
+      SearchDatasetsRequest,
+      SearchDatasetsResponse),
+     ('/readgroupsets/search',
+      SearchReadGroupSetsRequest,
+      SearchReadGroupSetsResponse),
+     ('/reads/search',
+      SearchReadsRequest,
+      SearchReadsResponse),
+     ('/references/search',
+      SearchReferencesRequest,
+      SearchReferencesResponse),
+     ('/referencesets/search',
+      SearchReferenceSetsRequest,
+      SearchReferenceSetsResponse),
+     ('/variants/search',
+      SearchVariantsRequest,
+      SearchVariantsResponse),
+     ('/variantsets/search',
+      SearchVariantSetsRequest,
+      SearchVariantSetsResponse)]
