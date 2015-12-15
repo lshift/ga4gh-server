@@ -175,7 +175,7 @@ class ReadsIntervalIterator(IntervalIterator):
     def _getEnd(cls, readAlignment):
         return (
             cls._getStart(readAlignment) +
-            len(readAlignment.alignedSequence))
+            len(readAlignment.aligned_sequence))
 
 
 class VariantsIntervalIterator(IntervalIterator):
@@ -556,10 +556,13 @@ class AbstractBackend(object):
         any point using the nextPageToken attribute of the request object.
         """
         self.startProfile()
-        request = protocol.fromJson(requestStr, requestClass)
-        # # TODO How do we detect when the page size is not set?
-        # if request.page_size <= 0:
-        #     raise exceptions.BadPageSizeException(request.page_size)
+        try:
+            request = protocol.fromJson(requestStr, requestClass)
+        except protocol.json_format.ParseError:
+            raise exceptions.InvalidJsonException(requestStr)
+        # TODO How do we detect when the page size is not set?
+        if request.page_size < 0:
+            raise exceptions.BadPageSizeException(request.page_size)
         responseBuilder = protocol.SearchResponseBuilder(
             responseClass, request.page_size, self._maxResponseLength)
         nextPageToken = None
@@ -584,7 +587,8 @@ class AbstractBackend(object):
         end = _parseIntegerArgument(requestArgs, 'end', reference.getLength())
         if 'pageToken' in requestArgs:
             pageTokenStr = requestArgs['pageToken']
-            start = _parsePageToken(pageTokenStr, 1)[0]
+            if pageTokenStr != "":
+                start = _parsePageToken(pageTokenStr, 1)[0]
 
         chunkSize = self._maxResponseLength
         nextPageToken = None
