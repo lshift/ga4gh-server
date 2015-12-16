@@ -162,8 +162,7 @@ class AbstractReferenceSet(datamodel.DatamodelObject):
         ret.is_derived = self.getIsDerived()
         ret.md5checksum = self.getMd5Checksum()
         ret.ncbi_taxon_id = self.getNcbiTaxonId()
-        # FIXME: figure out what to do with this
-        # ret.reference_ids.extend(self._referenceIds)
+        ret.reference_ids.extend(self._referenceIds)
         ret.source_accessions.extend(self.getSourceAccessions())
         ret.source_uri = self.getSourceUri()
         ret.name = self.getLocalId()
