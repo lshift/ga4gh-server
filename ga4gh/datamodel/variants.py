@@ -160,8 +160,7 @@ class AbstractVariantSet(datamodel.DatamodelObject):
         protocolElement.id = self.getId()
         protocolElement.dataset_id = self.getParentContainer().getId()
         protocolElement.name = self.getLocalId()
-        # TODO fixme -- proto issues.
-        # protocolElement.referenceSetId = self._referenceSetId
+        protocolElement.reference_set_id = self._referenceSetId
         for metadata in self.getMetadata():
             newValue = protocolElement.metadata.add()
             newValue.CopyFrom(metadata)
