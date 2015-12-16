@@ -516,7 +516,7 @@ class AbstractBackend(object):
             .parse(request.variant_set_id)
         dataset = self.getDataset(compoundId.dataset_id)
         variantSet = dataset.getVariantSet(compoundId.variant_set_id)
-        if request.name is None:
+        if request.name == "":
             return self._topLevelObjectGenerator(
                 request, variantSet.getNumCallSets(),
                 variantSet.getCallSetByIndex)
@@ -585,6 +585,8 @@ class AbstractBackend(object):
         reference = referenceSet.getReference(id_)
         start = _parseIntegerArgument(requestArgs, 'start', 0)
         end = _parseIntegerArgument(requestArgs, 'end', reference.getLength())
+        if end == 0: # assume meant "get all"
+            end = reference.getLength()
         if 'pageToken' in requestArgs:
             pageTokenStr = requestArgs['pageToken']
             if pageTokenStr != "":

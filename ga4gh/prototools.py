@@ -197,7 +197,7 @@ class ProtoTypeSwitch(object):
         components = []
         current = ""
         for c in camelStr:
-            if c.upper() == c:  # new word
+            if (not c.isnumeric()) and c.upper() == c:  # new word
                 components.append(current.lower())
                 current = c
             else:

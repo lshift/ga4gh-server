@@ -234,7 +234,7 @@ class VariantSetMetadataCompoundId(VariantSetCompoundId):
     """
     fields = VariantSetCompoundId.fields + ['key']
     containerIds = VariantSetCompoundId.containerIds + [
-        ('variantSetMetadataId', 1)]
+        ('variant_set_metadata_id', 1)]
 
 
 class VariantCompoundId(VariantSetCompoundId):

@@ -273,8 +273,9 @@ class EqualityTest(SchemaTest):
             kwargs = {}
             instance = self.getDefaultInstance(cls)
             for key in protocol.toJsonDict(instance).keys():
-                val = getattr(instance, key)
-                kwargs[key] = val
+                camel_key = prototools.ProtoTypeSwitch.toSnakeCase(key)
+                val = getattr(instance, camel_key)
+                kwargs[camel_key] = val
             secondInstance = cls(**kwargs)
             self.assertEqual(instance, secondInstance)
 

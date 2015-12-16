@@ -36,7 +36,8 @@ class TestSimulatedStack(unittest.TestCase):
             "SIMULATED_BACKEND_NUM_VARIANT_SETS": 4,
             "SIMULATED_BACKEND_NUM_REFERENCE_SETS": 3,
             "SIMULATED_BACKEND_NUM_REFERENCES_PER_REFERENCE_SET": 4,
-            "SIMULATED_BACKEND_NUM_ALIGNMENTS_PER_READ_GROUP": 5
+            "SIMULATED_BACKEND_NUM_ALIGNMENTS_PER_READ_GROUP": 5,
+            #"DEBUG": True
         }
         frontend.reset()
         frontend.configure(
@@ -105,7 +106,7 @@ class TestSimulatedStack(unittest.TestCase):
         ListReferenceBasesResponse.
         """
         path = '/references/{}/bases'.format(id_)
-        response = self.app.get(path, query_string=protocol.toJson(request))
+        response = self.app.get(path, query_string=protocol.toJsonDict(request))
         self.assertEqual(response.status_code, 200)
         obj = protocol.fromJson(
             response.data, protocol.ListReferenceBasesResponse)
@@ -540,7 +541,7 @@ class TestSimulatedStack(unittest.TestCase):
                 response = self.sendListReferenceBasesRequest(id_, args)
                 self.assertEqual(response.sequence, sequence)
                 # Try some simple slices.
-                ranges = [(0, length), (0, 1), (length - 1, length), (0, 0)]
+                ranges = [(0, length), (0, 1), (length - 1, length)]
                 for start, end in ranges:
                     args = protocol.ListReferenceBasesRequest()
                     args.start, args.end = start, end
@@ -566,7 +567,7 @@ class TestSimulatedStack(unittest.TestCase):
         for start, end in badRanges:
             args = protocol.ListReferenceBasesRequest()
             args.start, args.end = start, end
-            response = self.app.get(path, query_string=protocol.toJson(args))
+            response = self.app.get(path, query_string=protocol.toJsonDict(args))
             self.assertEqual(response.status_code, 416)
 
     def testListReferenceBasesPaging(self):
@@ -585,12 +586,7 @@ class TestSimulatedStack(unittest.TestCase):
                 self.assertEqual(response.sequence, sequence[:pageSize])
                 self.assertEqual(response.offset, start)
                 sequenceFragments = [response.sequence]
-                i = 0
                 while response.next_page_token is not "":
-                    i +=1
-                    print("npt", response.next_page_token)
-                    if i == 5:
-                        raise Exception, "\"%s\""%type(response.next_page_token)
                     args = protocol.ListReferenceBasesRequest()
                     args.page_token = response.next_page_token
                     args.start, args.end = start, end
@@ -602,6 +598,7 @@ class TestSimulatedStack(unittest.TestCase):
                         response.sequence,
                         completeSequence[
                             offset: offset + len(response.sequence)])
+
                 self.assertEqual("".join(sequenceFragments), sequence)
 
     def testReads(self):
