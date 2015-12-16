@@ -78,7 +78,7 @@ class TestFrontendErrors(unittest.TestCase):
             #     self.assertRequestRaises(
             #         exceptions.RequestValidationFailureException, url, request)
 
-            for badSize in [-100, -1, 0]:
+            for badSize in [-100, -1]: # FIXME: Can't test 0 because looks the same as unset to Protobuf
                 request = requestClass()
                 request.page_size = badSize
                 self.assertRequestRaises(
