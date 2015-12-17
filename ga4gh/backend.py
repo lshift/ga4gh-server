@@ -77,8 +77,8 @@ class IntervalIterator(object):
         else:
             # Set the search start point and the number of records to skip from
             # the page token.
-            searchAnchor, objectsToSkip = \
-                _parsePageToken(request.page_token, 2)
+            searchAnchor, objectsToSkip = _parsePageToken(
+                request.page_token, 2)
             self._pickUpIteration(searchAnchor, objectsToSkip)
 
     def _initialiseIteration(self):

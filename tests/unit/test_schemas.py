@@ -87,6 +87,14 @@ class SchemaTest(unittest.TestCase):
 
 class EqualityTest(SchemaTest):
     def snakeKeyDict(self, item, field):
+        """
+        Convert all the keys of an item and it's subitems to snake_keys
+        rather than camelCasedKeys
+
+        Needed because Protocol Buffers is using snake_keys, but the JSON
+        data is still in camelCasedKeys
+        """
+
         snake_test_val = {}
         for k in item.keys():
             k_field = [

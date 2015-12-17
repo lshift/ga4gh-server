@@ -88,7 +88,7 @@ class AbstractClient(object):
         while notDone:
             response = self._runListReferenceBasesPageRequest(id_, request)
             basesList.append(response.sequence)
-            notDone = response.next_page_token is not ""
+            notDone = bool(response.next_page_token)
             request.page_token = response.next_page_token
         return "".join(basesList)
 
