@@ -7,6 +7,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import datetime
+import random
 
 import pysam
 
@@ -66,15 +67,17 @@ class SamFlags(object):
     """
     Utility class for working with SAM flags
     """
-    NUMBER_READS = 0x1
-    PROPER_PLACEMENT = 0x2
-    REVERSED = 0x10
-    NEXT_MATE_REVERSED = 0x20
-    READ_NUMBER_ONE = 0x40
-    READ_NUMBER_TWO = 0x80
+    READ_PAIRED = 0x1
+    READ_PROPER_PAIR = 0x2
+    READ_UNMAPPED = 0x4
+    MATE_UNMAPPED = 0x8
+    READ_REVERSE_STRAND = 0x10
+    MATE_REVERSE_STRAND = 0x20
+    FIRST_IN_PAIR = 0x40
+    SECOND_IN_PAIR = 0x80
     SECONDARY_ALIGNMENT = 0x100
-    FAILED_VENDOR_QUALITY_CHECKS = 0x200
-    DUPLICATE_FRAGMENT = 0x400
+    FAILED_QUALITY_CHECK = 0x200
+    DUPLICATE_READ = 0x400
     SUPPLEMENTARY_ALIGNMENT = 0x800
 
     @staticmethod
@@ -421,27 +424,48 @@ class SimulatedReadGroup(AbstractReadGroup):
     """
     def __init__(self, parentContainer, localId, randomSeed, numAlignments=2):
         super(SimulatedReadGroup, self).__init__(parentContainer, localId)
+        self._randomSeed = randomSeed
 
     def getReadAlignments(self, referenceId=None, start=None, end=None):
-        for i in range(self.getNumAlignedReads()):
-            yield self._createReadAlignment(i)
+        rng = random.Random(self._randomSeed)
 
-    def _createReadAlignment(self, i):
+        # We seed reads with sequential seeds starting from here. We hope no
+        # ranges for two different simulated read groups ever overlap (because
+        # then we'd start seeing identical reads in the two groups.)
+        read_seed_start = rng.getrandbits(64)
+
+        for i in range(self.getNumAlignedReads()):
+            seed = read_seed_start + i
+            yield self._createReadAlignment(i, seed)
+
+    def _createReadAlignment(self, i, seed):
         # TODO fill out a bit more
+        rng = random.Random(seed)
         alignment = protocol.ReadAlignment()
-        alignment.aligned_quality.extend([1, 2, 3])
-        alignment.aligned_sequence = "ACT"
-        alignment.fragment_id = 'TODO'
-        gaPosition = alignment.alignment.position
+        alignment.fragment_length = rng.randint(10, 100)
+        #alignment.aligned_quality.clear()
+        alignment.aligned_sequence = ""
+        for i in range(alignment.fragment_length):
+            # TODO: are these reasonable quality values?
+            alignment.aligned_quality.append(rng.randint(1, 20))
+            alignment.aligned_sequence += rng.choice("ACGT")
+        alignment.fragment_id = "frag{}".format(seed)
+
+        gaLinearAlignment = alignment.alignment
+        gaPosition = gaLinearAlignment.position
         gaPosition.position = 0
         gaPosition.reference_name = "NotImplemented"
         gaPosition.strand = protocol.POS_STRAND
         alignment.duplicate_fragment = False
         alignment.failed_vendor_quality_checks = False
-        alignment.fragment_length = 3
+
         alignment.fragment_name = "simulated{}".format(i)
+        alignment.info.clear()
+        alignment.next_mate_position.Clear()
+        alignment.number_reads = 0
         alignment.proper_placement = False
         alignment.read_group_id = self.getId()
+        alignment.read_number = -1
         alignment.secondary_alignment = False
         alignment.supplementary_alignment = False
         alignment.id = self.getReadAlignmentId(alignment)
@@ -540,57 +564,67 @@ class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup):
         """
         Convert a pysam ReadAlignment to a GA4GH ReadAlignment
         """
+        samFile = self._parentContainer.getFileHandle(
+            self._parentSamFilePath)
         # TODO fill out remaining fields
         # TODO refine in tandem with code in converters module
         ret = protocol.ReadAlignment()
         ret.fragment_id = 'TODO'
-        if read.query_qualities is not None:
-            ret.aligned_quality.extend(list(read.query_qualities))
+        if read.query_qualities is None:
+            pass #ret.aligned_quality.clear()
+        else:
+            ret.aligned_quality.extend(read.query_qualities)
         ret.aligned_sequence = read.query_sequence
-        ret.alignment.mapping_quality = read.mapping_quality
-        samFile = self._parentContainer.getFileHandle(
-            self._parentSamFilePath)
-        ret.alignment.position.reference_name = samFile.getrname(
-            read.reference_id)
-        ret.alignment.position.position = read.reference_start
-        ret.alignment.position.strand = protocol.POS_STRAND
-        if SamFlags.isFlagSet(read.flag, SamFlags.REVERSED):
-            ret.alignment.position.strand = protocol.NEG_STRAND
-        for operation, length in read.cigar:
-            gaCigarUnit = ret.alignment.cigar.add()
-            gaCigarUnit.operation = SamCigar.int2ga(operation)
-            gaCigarUnit.operation_length = length
-            # gaCigarUnit.referenceSequence = None  # TODO fix this!
+        if SamFlags.isFlagSet(read.flag, SamFlags.READ_UNMAPPED):
+            ret.alignment.Clear()
+        else:
+            ret.alignment.mapping_quality = read.mapping_quality
+            ret.alignment.position.reference_name = samFile.getrname(
+                read.reference_id)
+            ret.alignment.position.position = read.reference_start
+            ret.alignment.position.strand = protocol.POS_STRAND
+            if SamFlags.isFlagSet(read.flag, SamFlags.READ_REVERSE_STRAND):
+                ret.alignment.position.strand = protocol.NEG_STRAND
+            for operation, length in read.cigar:
+                gaCigarUnit = protocol.CigarUnit()
+                gaCigarUnit.operation = SamCigar.int2ga(operation)
+                gaCigarUnit.operation_length = length
+                gaCigarUnit.reference_sequence = ""  # TODO fix this!
+                ret.alignment.cigar.extend([gaCigarUnit])
         ret.duplicate_fragment = SamFlags.isFlagSet(
-            read.flag, SamFlags.DUPLICATE_FRAGMENT)
+            read.flag, SamFlags.DUPLICATE_READ)
         ret.failed_vendor_quality_checks = SamFlags.isFlagSet(
-            read.flag, SamFlags.FAILED_VENDOR_QUALITY_CHECKS)
+            read.flag, SamFlags.FAILED_QUALITY_CHECK)
         ret.fragment_length = read.template_length
         ret.fragment_name = read.query_name
         for key, value in read.tags:
             ret.info[key].values.add(string_value=str(value))
-        if read.next_reference_id != -1:
-            ret.next_mate_position.reference_name = samFile.getrname(
-                read.next_reference_id)
+        if SamFlags.isFlagSet(read.flag, SamFlags.MATE_UNMAPPED):
+            pass
+        else:
+            if read.next_reference_id != -1:
+                ret.next_mate_position.reference_name = samFile.getrname(
+                    read.next_reference_id)
+            else:
+                ret.next_mate_position.reference_name = ""
             ret.next_mate_position.position = read.next_reference_start
             ret.next_mate_position.strand = protocol.POS_STRAND
-            if SamFlags.isFlagSet(read.flag, SamFlags.NEXT_MATE_REVERSED):
+            if SamFlags.isFlagSet(read.flag, SamFlags.MATE_REVERSE_STRAND):
                 ret.next_mate_position.strand = protocol.NEG_STRAND
-        # TODO Is this the correct mapping between numberReads and
-        # sam flag 0x1? What about the mapping between numberReads
-        # and 0x40 and 0x80?
-        if SamFlags.isFlagSet(read.flag, SamFlags.NUMBER_READS):
+        if SamFlags.isFlagSet(read.flag, SamFlags.READ_PAIRED):
             ret.number_reads = 2
-            if SamFlags.isFlagSet(read.flag,
-                                  SamFlags.READ_NUMBER_ONE |
-                                  SamFlags.READ_NUMBER_TWO):
+        else:
+            ret.number_reads = 1
+        ret.read_number = -1
+        if SamFlags.isFlagSet(read.flag, SamFlags.FIRST_IN_PAIR):
+            if SamFlags.isFlagSet(read.flag, SamFlags.SECOND_IN_PAIR):
                 ret.read_number = 2
-            elif SamFlags.isFlagSet(read.flag, SamFlags.READ_NUMBER_ONE):
+            else:
                 ret.read_number = 0
-            elif SamFlags.isFlagSet(read.flag, SamFlags.READ_NUMBER_TWO):
-                ret.read_number = 1
+        elif SamFlags.isFlagSet(read.flag, SamFlags.SECOND_IN_PAIR):
+            ret.read_number = 1
         ret.proper_placement = SamFlags.isFlagSet(
-            read.flag, SamFlags.PROPER_PLACEMENT)
+            read.flag, SamFlags.READ_PROPER_PAIR)
         ret.read_group_id = self.getId()
         ret.secondary_alignment = SamFlags.isFlagSet(
             read.flag, SamFlags.SECONDARY_ALIGNMENT)
