@@ -443,7 +443,6 @@ class SimulatedReadGroup(AbstractReadGroup):
         rng = random.Random(seed)
         alignment = protocol.ReadAlignment()
         alignment.fragment_length = rng.randint(10, 100)
-        #alignment.aligned_quality.clear()
         alignment.aligned_sequence = ""
         for i in range(alignment.fragment_length):
             # TODO: are these reasonable quality values?
@@ -571,7 +570,7 @@ class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup):
         ret = protocol.ReadAlignment()
         ret.fragment_id = 'TODO'
         if read.query_qualities is None:
-            pass #ret.aligned_quality.clear()
+            pass  # ret.aligned_quality.clear()
         else:
             ret.aligned_quality.extend(read.query_qualities)
         ret.aligned_sequence = read.query_sequence

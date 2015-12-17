@@ -144,7 +144,7 @@ class ReferenceSetTest(datadriven.DataDrivenTest):
         # test searching with start and end succeeds
         self.doRangeTest(2, 5)
 
-    @unittest.skip("Not allowed, as we assume now that the 0 is unset, as protobuf3 has 0 == None")
+    @unittest.skip("We assume that the 0 is unset, as protobuf3 has 0 == None")
     def testGetBasesEmpty(self):
         self.doRangeTest(0, 0)
 

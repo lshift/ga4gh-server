@@ -392,6 +392,7 @@ class DefaultInstanceCreator(TypicalInstanceCreator):
         instance = protocol.fromJsonDict(jsonDict, self.class_)
         return instance
 
+
 class Validator(ProtoTool):
     def getInvalidFields(self, jsonDict):
         # FIXME: get the proper list of fields

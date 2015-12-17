@@ -172,7 +172,7 @@ class SamLine(object):
         if read.alignment is None:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.READ_UNMAPPED)
-        if read.next_mate_position.ByteSize() == 0: # cleared
+        if read.next_mate_position.ByteSize() == 0:  # cleared
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.MATE_UNMAPPED)
         if (read.alignment is not None and
@@ -226,11 +226,13 @@ class SamLine(object):
     def _parseTagValue(cls, tag, value):
         if tag[0] in cls._tagReservedFieldPrefixes:
             # user reserved fields... not really sure what to do here
-            return protocol.getValueFromValue(value.values[0]).encode(cls._encoding)
+            return protocol.getValueFromValue(value.values[0]) \
+                .encode(cls._encoding)
         elif tag in cls._tagIntegerFields:
             return int(protocol.getValueFromValue(value.values[0]))
         elif tag in cls._tagStringFields:
-            return protocol.getValueFromValue(value.values[0]).encode(cls._encoding)
+            return protocol.getValueFromValue(value.values[0]) \
+                .encode(cls._encoding)
         elif tag in cls._tagIntegerArrayFields:
             return [int(integerString) for integerString in value]
         else:

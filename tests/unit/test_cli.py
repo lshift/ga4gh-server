@@ -14,6 +14,7 @@ import ga4gh.protocol as protocol
 import google.protobuf.descriptor as descriptor
 import google.protobuf.internal.python_message as python_message
 
+
 class TestGa2VcfArguments(unittest.TestCase):
     """
     Tests the ga2vcf cli can parse all arguments it is supposed to
@@ -233,41 +234,44 @@ class TestOutputFormats(unittest.TestCase):
         __metaclass__ = python_message.GeneratedProtocolMessageType
 
         FILE = descriptor.FileDescriptor(__file__, "test", "")
-        DESCRIPTOR = descriptor.Descriptor("FakeObject", "test.FakeObject", filename = __file__,
-            file = FILE,
-            containing_type = None,
-            fields = [
+        DESCRIPTOR = descriptor.Descriptor(
+            "FakeObject",
+            "test.FakeObject",
+            filename=__file__,
+            file=FILE,
+            containing_type=None,
+            fields=[
                 descriptor.FieldDescriptor(
-                    name = "name",
-                    full_name = "test.FakeObject.name",
-                    index = 0,
-                    number = 1,
-                    type = descriptor.FieldDescriptor.TYPE_STRING,
-                    cpp_type = descriptor.FieldDescriptor.CPPTYPE_STRING,
-                    label = descriptor.FieldDescriptor.LABEL_REQUIRED,
-                    default_value = "",
+                    name="name",
+                    full_name="test.FakeObject.name",
+                    index=0,
+                    number=1,
+                    type=descriptor.FieldDescriptor.TYPE_STRING,
+                    cpp_type=descriptor.FieldDescriptor.CPPTYPE_STRING,
+                    label=descriptor.FieldDescriptor.LABEL_REQUIRED,
+                    default_value="",
                     message_type=None,
                     enum_type=None,
-                    containing_type = None,
-                    is_extension = False,
+                    containing_type=None,
+                    is_extension=False,
                     extension_scope=None
                 ),
                 descriptor.FieldDescriptor(
-                    name = "id",
-                    full_name = "test.FakeObject.id",
-                    index = 1,
-                    number = 2,
-                    type = descriptor.FieldDescriptor.TYPE_STRING,
-                    cpp_type = descriptor.FieldDescriptor.CPPTYPE_STRING,
-                    label = descriptor.FieldDescriptor.LABEL_REQUIRED,
-                    default_value = "",
+                    name="id",
+                    full_name="test.FakeObject.id",
+                    index=1,
+                    number=2,
+                    type=descriptor.FieldDescriptor.TYPE_STRING,
+                    cpp_type=descriptor.FieldDescriptor.CPPTYPE_STRING,
+                    label=descriptor.FieldDescriptor.LABEL_REQUIRED,
+                    default_value="",
                     message_type=None,
                     enum_type=None,
-                    containing_type = None,
-                    is_extension = False,
+                    containing_type=None,
+                    is_extension=False,
                     extension_scope=None
                 )
-            ], nested_types = [], enum_types = [], extensions = [])
+            ], nested_types=[], enum_types=[], extensions=[])
 
     def makeFakeObject(self):
         returnObj = self.FakeObject()

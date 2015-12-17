@@ -85,7 +85,6 @@ class TestExceptionConsistency(unittest.TestCase):
             # some exceptions are becoming too complicated to instantiate
             # like the rest of the exceptions; just do them manually
             if class_ == exceptions.RequestValidationFailureException:
-                wrongString = "thisIsWrong"
                 objClass = protocol.SearchReadsRequest
                 obj = objClass()
                 obj.start = -1
@@ -95,7 +94,6 @@ class TestExceptionConsistency(unittest.TestCase):
                 objClass = protocol.SearchReadsResponse
                 obj = objClass()
                 obj.alignments.extend([protocol.ReadAlignment()])
-                #obj.alignments[0].alignment = protocol.LinearAlignment()
                 obj.alignments[0].alignment.mapping_quality = -1
                 jsonDict = protocol.toJsonDict(obj)
                 args = (jsonDict, objClass)
@@ -139,7 +137,6 @@ class TestValidationExceptions(unittest.TestCase):
         objClass = protocol.SearchReadsResponse
         obj = objClass()
         obj.alignments.extend([protocol.ReadAlignment()])
-        #obj.alignments[0].alignment = protocol.LinearAlignment()
         obj.alignments[0].alignment.mapping_quality = wrongString
         jsonDict = obj.toJsonDict()
         instance = exceptions.ResponseValidationFailureException(

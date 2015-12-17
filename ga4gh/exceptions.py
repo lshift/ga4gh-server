@@ -148,9 +148,9 @@ class RequestValidationFailureException(BadRequestException):
             "invalid fields: {}")
         validator = prototools.Validator(requestClass)
         self.message = messageString.format(
-            jsonDict, requestClass
-             , validator.getInvalidFields(jsonDict)
-            )
+            jsonDict, requestClass,
+            validator.getInvalidFields(jsonDict)
+        )
 
 
 class BadReadsSearchRequestBothRefs(BadRequestException):
@@ -526,8 +526,8 @@ class ResponseValidationFailureException(ServerError):
             "Response '{}' is not a valid instance of {}. "
             "Invalid fields: {} "
             "Please file a bug report.".format(
-                jsonDict, requestClass
-                , validator.getInvalidFields(jsonDict)
+                jsonDict, requestClass,
+                validator.getInvalidFields(jsonDict)
             ))
 
 

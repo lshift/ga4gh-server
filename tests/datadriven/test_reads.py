@@ -15,7 +15,6 @@ import ga4gh.datamodel.references as references
 import ga4gh.protocol as protocol
 import tests.datadriven as datadriven
 import tests.utils as utils
-import proto.ga4gh.common_pb2 as common_pb2
 
 import pysam
 

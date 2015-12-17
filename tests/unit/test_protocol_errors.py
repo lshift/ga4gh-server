@@ -68,17 +68,10 @@ class TestFrontendErrors(unittest.TestCase):
         self.assertRawRequestRaises(
             exceptionClass, url, protocol.toJson(request))
 
-
     def testPageSize(self):
         for url, requestClass in self.endPointMap.items():
-            # # Gets caught by the protocol buffer checkers
-            # for badType in ["", "1", "None", 0.0, 1e3]:
-            #     request = requestClass()
-            #     request.page_size = badType
-            #     self.assertRequestRaises(
-            #         exceptions.RequestValidationFailureException, url, request)
-
-            for badSize in [-100, -1]: # FIXME: Can't test 0 because looks the same as unset to Protobuf
+            # FIXME: Can't test 0 because looks the same as unset to Protobuf
+            for badSize in [-100, -1]:
                 request = requestClass()
                 request.page_size = badSize
                 self.assertRequestRaises(

@@ -37,7 +37,7 @@ class TestSimulatedStack(unittest.TestCase):
             "SIMULATED_BACKEND_NUM_REFERENCE_SETS": 3,
             "SIMULATED_BACKEND_NUM_REFERENCES_PER_REFERENCE_SET": 4,
             "SIMULATED_BACKEND_NUM_ALIGNMENTS_PER_READ_GROUP": 5,
-            #"DEBUG": True
+            # "DEBUG": True
         }
         frontend.reset()
         frontend.configure(
@@ -106,7 +106,8 @@ class TestSimulatedStack(unittest.TestCase):
         ListReferenceBasesResponse.
         """
         path = '/references/{}/bases'.format(id_)
-        response = self.app.get(path, query_string=protocol.toJsonDict(request))
+        response = self.app.get(
+            path, query_string=protocol.toJsonDict(request))
         self.assertEqual(response.status_code, 200)
         obj = protocol.fromJson(
             response.data, protocol.ListReferenceBasesResponse)
@@ -202,7 +203,8 @@ class TestSimulatedStack(unittest.TestCase):
         """
         responseData = self.sendSearchRequest(path, request, responseClass)
         self.assertEqual("", responseData.next_page_token)
-        responseList = getattr(responseData, protocol.getValueListName(responseClass))
+        responseList = getattr(
+            responseData, protocol.getValueListName(responseClass))
         self.assertEqual(0, len(responseList))
 
     def assertObjectNotFound(self, response):
@@ -567,7 +569,8 @@ class TestSimulatedStack(unittest.TestCase):
         for start, end in badRanges:
             args = protocol.ListReferenceBasesRequest()
             args.start, args.end = start, end
-            response = self.app.get(path, query_string=protocol.toJsonDict(args))
+            response = self.app.get(
+                path, query_string=protocol.toJsonDict(args))
             self.assertEqual(response.status_code, 416)
 
     def testListReferenceBasesPaging(self):

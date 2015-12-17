@@ -59,58 +59,6 @@ class SchemaTest(unittest.TestCase):
         value = prototools.Creator(cls).getInvalidField(fieldName)
         return value
 
-    def getTypicalValue(self, cls, fieldName):
-        """
-        Returns a typical value for the specified field on the specified
-        Protocol class.
-        """
-        # We make some simplifying assumptions about how the schema is
-        # structured which fits the way the GA4GH protocol is currently
-        # designed but may break in the future. We try to at least flag
-        # this fact here.
-        err = "Schema structure assumptions violated"
-        field = self.getAvroSchema(cls, fieldName)
-        typ = field.type
-        if isinstance(typ, avro.schema.UnionSchema):
-            t0 = typ.schemas[0]
-            t1 = typ.schemas[1]
-            if isinstance(t0, avro.schema.PrimitiveSchema):
-                if t0.type == "null":
-                    typ = typ.schemas[1]
-                elif t1.type == "null":
-                    typ = typ.schemas[0]
-                else:
-                    raise Exception(err)
-        ret = None
-        if isinstance(typ, avro.schema.MapSchema):
-            ret = {"key": ["value1", "value2"]}
-            if not isinstance(typ.values, avro.schema.ArraySchema):
-                raise Exception(err)
-            if not isinstance(typ.values.items, avro.schema.PrimitiveSchema):
-                raise Exception(err)
-            if typ.values.items.type != "string":
-                raise Exception(err)
-        elif isinstance(typ, avro.schema.ArraySchema):
-            if cls.isEmbeddedType(field.name):
-                embeddedClass = cls.getEmbeddedType(field.name)
-                ret = [self.getTypicalInstance(embeddedClass)]
-            else:
-                if not isinstance(typ.items, avro.schema.PrimitiveSchema):
-                    raise Exception(err)
-                ret = [self.typicalValueMap[typ.items.type]]
-        elif isinstance(typ, avro.schema.EnumSchema):
-            ret = typ.symbols[0]
-        elif isinstance(typ, avro.schema.RecordSchema):
-            self.assertTrue(cls.isEmbeddedType(fieldName))
-            embeddedClass = cls.getEmbeddedType(fieldName)
-            ret = self.getTypicalInstance(embeddedClass)
-        elif typ.type in self.typicalValueMap:
-            ret = self.typicalValueMap[typ.type]
-        else:
-            raise Exception(err)
-
-        return ret
-
     def getTypicalInstance(self, cls):
         """
         Returns a typical instance of the specified protocol class.
@@ -443,7 +391,8 @@ class SearchResponseBuilderTest(SchemaTest):
                 builder.addValue(self.getTypicalInstance(valueClass))
             instance = protocol.fromJson(
                 builder.getSerializedResponse(), responseClass)
-            valueList = getattr(instance, protocol.getValueListName(responseClass))
+            valueList = getattr(
+                instance, protocol.getValueListName(responseClass))
             self.assertEqual(len(valueList), pageSize)
 
     def testMaxResponseLengthOverridesPageSize(self):
@@ -461,7 +410,8 @@ class SearchResponseBuilderTest(SchemaTest):
                 builder.addValue(typicalValue)
             instance = protocol.fromJson(
                 builder.getSerializedResponse(), responseClass)
-            valueList = getattr(instance, protocol.getValueListName(responseClass))
+            valueList = getattr(
+                instance, protocol.getValueListName(responseClass))
             self.assertEqual(len(valueList), numValues)
 
     def testNextPageToken(self):

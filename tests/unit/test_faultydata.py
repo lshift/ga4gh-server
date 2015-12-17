@@ -12,7 +12,6 @@ import ga4gh.datamodel.datasets as datasets
 import ga4gh.datamodel.references as references
 import ga4gh.datamodel.variants as variants
 import ga4gh.exceptions as exceptions
-import ga4gh.protocol as protocol
 import ga4gh.backend as backend
 import proto
 

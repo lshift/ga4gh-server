@@ -86,7 +86,8 @@ class IntervalIterator(object):
         Starts a new iteration.
         """
         self._searchIterator = self._search(
-            self._request.start, self._request.end if self._request.end != 0 else None)
+            self._request.start,
+            self._request.end if self._request.end != 0 else None)
         self._currentObject = next(self._searchIterator, None)
         if self._currentObject is not None:
             self._nextObject = next(self._searchIterator, None)
@@ -590,7 +591,7 @@ class AbstractBackend(object):
         reference = referenceSet.getReference(id_)
         start = _parseIntegerArgument(requestArgs, 'start', 0)
         end = _parseIntegerArgument(requestArgs, 'end', reference.getLength())
-        if end == 0: # assume meant "get all"
+        if end == 0:  # assume meant "get all"
             end = reference.getLength()
         if 'pageToken' in requestArgs:
             pageTokenStr = requestArgs['pageToken']
