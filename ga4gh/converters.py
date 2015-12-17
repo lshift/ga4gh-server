@@ -172,7 +172,7 @@ class SamLine(object):
         if read.alignment is None:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.READ_UNMAPPED)
-        if read.next_mate_position is None:
+        if read.next_mate_position.ByteSize() == 0: # cleared
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.MATE_UNMAPPED)
         if (read.alignment is not None and
@@ -184,7 +184,7 @@ class SamLine(object):
                 read.next_mate_position.strand == protocol.NEG_STRAND):
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.MATE_REVERSE_STRAND)
-        if read.read_number is None:
+        if read.read_number in [None, -1]:
             pass
         elif read.read_number == 0:
             flag = reads.SamFlags.setFlag(
