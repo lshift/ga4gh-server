@@ -450,7 +450,7 @@ class SearchResponseBuilderTest(SchemaTest):
         responseClass = protocol.SearchVariantsResponse
         valueClass = protocol.Variant
         typicalValue = self.getTypicalInstance(valueClass)
-        typicalValueLength = len(protocol.toJson(typicalValue))
+        typicalValueLength = len(protocol.toJson(typicalValue, indent=None))
         for numValues in range(1, 10):
             maxResponseLength = numValues * typicalValueLength
             builder = protocol.SearchResponseBuilder(

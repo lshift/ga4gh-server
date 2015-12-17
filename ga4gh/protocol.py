@@ -182,7 +182,7 @@ class SearchResponseBuilder(object):
         return (
             (self._pageSize > 0 and self._numElements >= self._pageSize) or
             (self._maxResponseLength > 0 and
-             self._protoObject.ByteSize() >= self._maxResponseLength)
+             len(toJson(self._protoObject, indent = None)) >= self._maxResponseLength)
         )
 
     def getSerializedResponse(self):
