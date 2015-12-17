@@ -120,75 +120,75 @@ class SamLine(object):
     def toAlignedSegment(cls, read, targetIds):
         ret = pysam.AlignedSegment()
         # QNAME
-        ret.query_name = read.fragmentName.encode(cls._encoding)
+        ret.query_name = read.fragment_name.encode(cls._encoding)
         # SEQ
-        ret.query_sequence = read.alignedSequence.encode(cls._encoding)
+        ret.query_sequence = read.aligned_sequence.encode(cls._encoding)
         # FLAG
         ret.flag = cls.toSamFlag(read)
         # RNAME
-        refName = read.alignment.position.referenceName
+        refName = read.alignment.position.reference_name
         ret.reference_id = targetIds[refName]
         # POS
         ret.reference_start = int(read.alignment.position.position)
         # MAPQ
-        ret.mapping_quality = read.alignment.mappingQuality
+        ret.mapping_quality = read.alignment.mapping_quality
         # CIGAR
         ret.cigar = cls.toCigar(read)
         # RNEXT
-        if read.nextMatePosition is None:
+        if read.next_mate_position is None:
             ret.next_reference_id = -1
         else:
-            nextRefName = read.nextMatePosition.referenceName
+            nextRefName = read.next_mate_position.reference_name
             ret.next_reference_id = targetIds[nextRefName]
         # PNEXT
-        if read.nextMatePosition is None:
+        if read.next_mate_position is None:
             ret.next_reference_start = -1
         else:
-            ret.next_reference_start = int(read.nextMatePosition.position)
+            ret.next_reference_start = int(read.next_mate_position.position)
         # TLEN
-        ret.template_length = read.fragmentLength
+        ret.template_length = read.fragment_length
         # QUAL
-        ret.query_qualities = read.alignedQuality
+        ret.query_qualities = read.aligned_quality
         ret.tags = cls.toTags(read)
         return ret
 
     @classmethod
     def toSamFlag(cls, read):
         flag = 0
-        if read.numberReads:
+        if read.number_reads:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.NUMBER_READS)
-        if read.properPlacement:
+        if read.proper_placement:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.PROPER_PLACEMENT)
-        if read.alignment.position.strand == protocol.Strand.NEG_STRAND:
+        if read.alignment.position.strand == protocol.NEG_STRAND:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.REVERSED)
-        if (read.nextMatePosition is not None and
-                read.nextMatePosition.strand == protocol.Strand.NEG_STRAND):
+        if (read.next_mate_position is not None and
+                read.next_mate_position.strand == protocol.NEG_STRAND):
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.NEXT_MATE_REVERSED)
-        if read.readNumber == 0:
+        if read.read_number == 0:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.READ_NUMBER_ONE)
-        elif read.readNumber == 1:
+        elif read.read_number == 1:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.READ_NUMBER_TWO)
-        elif read.readNumber == 2:
+        elif read.read_number == 2:
             flag = reads.SamFlags.setFlag(
                 flag,
                 reads.SamFlags.READ_NUMBER_ONE |
                 reads.SamFlags.READ_NUMBER_TWO)
-        if read.secondaryAlignment:
+        if read.secondary_alignment:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.SECONDARY_ALIGNMENT)
-        if read.failedVendorQualityChecks:
+        if read.failed_vendor_quality_checks:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.FAILED_VENDOR_QUALITY_CHECKS)
-        if read.duplicateFragment:
+        if read.duplicate_fragment:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.DUPLICATE_FRAGMENT)
-        if read.supplementaryAlignment:
+        if read.supplementary_alignment:
             flag = reads.SamFlags.setFlag(
                 flag, reads.SamFlags.SUPPLEMENTARY_ALIGNMENT)
         return flag
@@ -198,7 +198,7 @@ class SamLine(object):
         cigarTuples = []
         for gaCigarUnit in read.alignment.cigar:
             operation = reads.SamCigar.ga2int(gaCigarUnit.operation)
-            length = int(gaCigarUnit.operationLength)
+            length = int(gaCigarUnit.operation_length)
             cigarTuple = (operation, length)
             cigarTuples.append(cigarTuple)
         return tuple(cigarTuples)
@@ -207,11 +207,11 @@ class SamLine(object):
     def _parseTagValue(cls, tag, value):
         if tag[0] in cls._tagReservedFieldPrefixes:
             # user reserved fields... not really sure what to do here
-            return value[0].encode(cls._encoding)
+            return protocol.getValueFromValue(value.values[0]).encode(cls._encoding)
         elif tag in cls._tagIntegerFields:
-            return int(value[0])
+            return int(protocol.getValueFromValue(value.values[0]))
         elif tag in cls._tagStringFields:
-            return value[0].encode(cls._encoding)
+            return protocol.getValueFromValue(value.values[0]).encode(cls._encoding)
         elif tag in cls._tagIntegerArrayFields:
             return [int(integerString) for integerString in value]
         else:
