@@ -7,7 +7,6 @@ cache:
   directories:
     - $HOME/.cache/pip
     - $HOME/virtualenv/python2.7.9
-    - protobuf/src/
 
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
@@ -18,14 +17,6 @@ before_install:
 
 install:
   - pip install --use-wheel --find-links=wheelhouse/ -r requirements.txt
-  - cd protobuf
-  - ./autogen.sh
-  - ./configure
-  - cd src
-  - make protoc
-  - cd ../python
-  - python setup.py install
-  - cd ../../
   - python setup.py install
 
 before_script:
