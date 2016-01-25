@@ -7,12 +7,12 @@ from __future__ import unicode_literals
 
 import os
 import unittest
-import proto
 
 import ga4gh.datamodel.datasets as datasets
 import ga4gh.datamodel.references as references
 import ga4gh.datamodel.variants as variants
 import ga4gh.exceptions as exceptions
+import ga4gh.protocol as protocol
 import ga4gh.backend as backend
 import ga4gh.datarepo as datarepo
 
@@ -97,7 +97,7 @@ class TestDuplicateCallSetId(FaultyVariantDataTest):
     """
     localIds = ["duplicated_sampleid"]
 
-    @unittest.skipIf(proto.version.startswith("0.6"), "")
+    @unittest.skipIf(protocol.version.startswith("0.6"), "")
     def testInstantiation(self):
         for localId in self.localIds:
             path = self.getFullPath(localId)

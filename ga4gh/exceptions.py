@@ -9,6 +9,7 @@ from __future__ import unicode_literals
 import sys
 import zlib
 import inspect
+import json
 
 import ga4gh.protocol as protocol
 
@@ -136,6 +137,7 @@ class InvalidJsonException(BadRequestException):
     def __init__(self, jsonString):
         self.message = "Cannot parse JSON: '{}'".format(jsonString)
 
+
 class Validator(object):
     def __init__(self, class_):
         self.class_ = class_
@@ -143,8 +145,9 @@ class Validator(object):
 
     def getInvalidFields(self, jsonDict):
         # FIXME: get the proper list of fields
-        protocol.fromJsonDict(jsonDict, self.class_)
+        protocol.fromJson(json.dumps(jsonDict), self.class_)
         return []
+
 
 class RequestValidationFailureException(BadRequestException):
     """

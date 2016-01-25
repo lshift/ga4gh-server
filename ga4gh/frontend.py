@@ -20,7 +20,6 @@ import werkzeug
 import oic
 import oic.oauth2
 import oic.oic.message as message
-import proto
 import requests
 
 import ga4gh
@@ -104,7 +103,7 @@ class ServerStatus(object):
         """
         Returns the GA4GH protocol version we support.
         """
-        return proto.version
+        return protocol.version
 
     def getServerVersion(self):
         """

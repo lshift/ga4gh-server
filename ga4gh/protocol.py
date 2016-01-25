@@ -10,7 +10,6 @@ import json
 import inspect
 
 import google.protobuf.json_format as json_format
-# from google.protobuf import reflection as reflection
 import google.protobuf.message as message
 
 import ga4gh.pb as pb
@@ -24,6 +23,10 @@ from proto.ga4gh.references_pb2 import *  # noqa
 from proto.ga4gh.variant_service_pb2 import *  # noqa
 from proto.ga4gh.variants_pb2 import *  # noqa
 import proto.google.protobuf.struct_pb2 as struct_pb2
+
+import proto
+
+version = proto.version
 
 # A map of response objects to the name of the attribute used to
 # store the values returned.
@@ -59,48 +62,45 @@ def convertDatetime(t):
 
 
 def getValueFromValue(value):
+    """
+    Extract the currently set field from a Value structure
+    """
     if type(value) != struct_pb2.Value:
-        raise Exception(type(value))
-    if value.WhichOneof("kind") == None:
-        raise Exception("Nothing set for %s" % value)
+        raise TypeError("Expected a Value, but got {}".format(type(value)))
+    if value.WhichOneof("kind") is None:
+        raise AttributeError("Nothing set for {}".format(value))
     return getattr(value, value.WhichOneof("kind"))
 
 
-def mergeLists(lists):
-    return reduce(list.__add__, lists)
-
-
-def getDictFromMessageMap(messageMap):
-    return dict([
-        (k, [getValueFromValue(x) for x in v.values])
-        for (k, v) in messageMap._values.items()])
-
-
-def toJson(protoObject, indent=2):
+def toJson(protoObject, indent=None):
     """
-    Serialises a proto-buf object as json
+    Serialises a protobuf object as json
     """
     # Using the internal method because this way we can reformat the JSON
     js = json_format._MessageToJsonObject(protoObject, True)
     return json.dumps(js, indent=indent)
 
 
-def fromJsonDict(jsonDict, protoClass):
-    return fromJson(json.dumps(jsonDict), protoClass)
+def toJsonDict(protoObject):
+    """
+    Converts a protobuf object to the raw attributes
+    i.e. a key/value dictionary
+    """
+    return json.loads(toJson(protoObject))
 
 
 def fromJson(json, protoClass):
     """
-    Deserialise json into an instance of proto-buf class
+    Deserialise json into an instance of protobuf class
     """
     return json_format.Parse(json, protoClass())
 
 
-def toJsonDict(protoObject):
-    return json.loads(toJson(protoObject))
-
-
 def validate(json, protoClass):
+    """
+    Check that json represents data that could be used to make
+    a given protobuf class
+    """
     try:
         fromJson(json, protoClass)
         # The json conversion automatically validates

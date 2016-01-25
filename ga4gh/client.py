@@ -32,8 +32,6 @@ class AbstractClient(object):
         self._logger.debug("response:{}".format(jsonResponseString))
         if not jsonResponseString:
             raise exceptions.EmptyResponseException()
-        # self._updateBytesRead(jsonResponseString)
-        # self._debugResponse(jsonResponseString)
         return protocol.fromJson(jsonResponseString, protocolResponseClass)
 
     def _runSearchPageRequest(

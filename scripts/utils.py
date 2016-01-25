@@ -143,7 +143,7 @@ def runCommandSplits(splits, silent=False):
     except OSError, e:
         if e.errno == 2:  # cmd not found
             raise Exception(
-                "Can't find command while trying to run %s" % splits)
+                "Can't find command while trying to run {}".format(splits))
         else:
             raise
 

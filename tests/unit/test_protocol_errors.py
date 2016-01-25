@@ -10,7 +10,6 @@ import unittest
 import ga4gh.frontend as frontend
 import ga4gh.exceptions as exceptions
 import ga4gh.protocol as protocol
-# import ga4gh.avrotools as avrotools
 
 
 class TestFrontendErrors(unittest.TestCase):
@@ -70,7 +69,6 @@ class TestFrontendErrors(unittest.TestCase):
 
     def testPageSize(self):
         for url, requestClass in self.endPointMap.items():
-            # FIXME: Can't test 0 because looks the same as unset to Protobuf
             for badSize in [-100, -1]:
                 request = requestClass()
                 request.page_size = badSize
