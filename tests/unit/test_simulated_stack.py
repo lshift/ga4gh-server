@@ -223,9 +223,9 @@ class TestSimulatedStack(unittest.TestCase):
         Checks that the specified response returns a not supported 501 status
         """
         self.assertEqual(501, response.status_code)
-        error = protocol.GAException.fromJsonString(response.data)
-        self.assertTrue(error.validate(error.toJsonDict()))
-        self.assertGreater(error.errorCode, 0)
+        error = protocol.fromJson(response.data, protocol.GAException)
+        self.assertTrue(protocol.validate(protocol.toJson(error), type(error)))
+        self.assertGreater(error.error_code, 0)
         self.assertGreater(len(error.message), 0)
 
     def verifySearchMethodFails(self, request, path):
@@ -236,7 +236,7 @@ class TestSimulatedStack(unittest.TestCase):
         self.assertObjectNotFound(response)
 
     def verifySearchMethodNotSupported(self, request, path):
-        response = self.sendJsonPostRequest(path, request.toJsonString())
+        response = self.sendJsonPostRequest(path, protocol.toJson(request))
         self.assertObjectNotSupported(response)
 
     def verifyGetMethodFails(self, path, id_):
@@ -648,11 +648,12 @@ class TestSimulatedStack(unittest.TestCase):
 
         # unmapped Reads
         request = protocol.SearchReadsRequest()
-        request.readGroupIds = [readGroup.getId()]
-        request.referenceId = None
+        request.read_group_ids.append(readGroup.getId())
+        request.reference_id = ""
         self.verifySearchMethodNotSupported(request, path)
 
         # multiple ReadGroupSets
-        request.readGroupIds = [readGroup.getId(), "42"]
-        request.referenceId = reference.getId()
+        request.read_group_ids.append(readGroup.getId())
+        request.read_group_ids.append("42")
+        request.reference_id = reference.getId()
         self.verifySearchMethodNotSupported(request, path)

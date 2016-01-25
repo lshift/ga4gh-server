@@ -102,9 +102,9 @@ class TestFrontend(unittest.TestCase):
         request.variant_set_id = variantSets[0].id
         return self.sendPostRequest('/callsets/search', request)
 
-    def sendReadsSearch(self, readGroupIds=None, referenceId=None):
+    def sendReadsSearch(self, readGroupIds=None, referenceId=""):
         request = protocol.SearchReadsRequest()
-        request.read_group_ids = readGroupIds
+        request.read_group_ids.extend(readGroupIds)
         request.reference_id = referenceId
         return self.sendPostRequest('/reads/search', request)
 
@@ -383,7 +383,7 @@ class TestFrontend(unittest.TestCase):
 
     def testSearchUnmappedReads(self):
         response = self.sendReadsSearch(readGroupIds=[self.readGroupId],
-                                        referenceId=None)
+                                        referenceId="")
         self.assertEqual(501, response.status_code)
 
     def testSearchReadsMultipleReadGroupSets(self):
