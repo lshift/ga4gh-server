@@ -11,7 +11,6 @@ import zlib
 import inspect
 
 import ga4gh.protocol as protocol
-import ga4gh.prototools as prototools
 
 
 def getExceptionClass(errorCode):
@@ -137,6 +136,15 @@ class InvalidJsonException(BadRequestException):
     def __init__(self, jsonString):
         self.message = "Cannot parse JSON: '{}'".format(jsonString)
 
+class Validator(object):
+    def __init__(self, class_):
+        self.class_ = class_
+        self.schema = class_.DESCRIPTOR
+
+    def getInvalidFields(self, jsonDict):
+        # FIXME: get the proper list of fields
+        protocol.fromJsonDict(jsonDict, self.class_)
+        return []
 
 class RequestValidationFailureException(BadRequestException):
     """
@@ -146,7 +154,7 @@ class RequestValidationFailureException(BadRequestException):
         messageString = (
             "Request '{}' is not a valid instance of {}; "
             "invalid fields: {}")
-        validator = prototools.Validator(requestClass)
+        validator = Validator(requestClass)
         self.message = messageString.format(
             jsonDict, requestClass,
             validator.getInvalidFields(jsonDict)
@@ -521,7 +529,7 @@ class ResponseValidationFailureException(ServerError):
     A validation of the response data failed
     """
     def __init__(self, jsonDict, requestClass):
-        validator = prototools.Validator(requestClass)
+        validator = Validator(requestClass)
         self.message = (
             "Response '{}' is not a valid instance of {}. "
             "Invalid fields: {} "

@@ -163,8 +163,7 @@ class ImportGraphLayerChecker(object):
         'libraries': ['ga4gh/converters.py',
                       'ga4gh/configtest.py'],
         'protocol': ['ga4gh/protocol.py',
-                     'ga4gh/pb.py',
-                     'ga4gh/prototools.py'],
+                     'ga4gh/pb.py'],
         'config': ['ga4gh/serverconfig.py'],
     }
 
