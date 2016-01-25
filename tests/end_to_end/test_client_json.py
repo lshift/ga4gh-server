@@ -14,6 +14,7 @@ import ga4gh.client as client
 import ga4gh.backend as backend
 import ga4gh.cli as cli
 import ga4gh.protocol as protocol
+import ga4gh.datarepo as datarepo
 import tests.utils as utils
 
 
@@ -24,7 +25,8 @@ class TestClientOutput(unittest.TestCase):
     def setUp(self):
         self._dataDir = "tests/data"
         self._dataUrl = "file://{}".format(self._dataDir)
-        self._backend = backend.FileSystemBackend(self._dataDir)
+        self._backend = backend.Backend(
+            datarepo.FileSystemDataRepository(self._dataDir))
         self._client = client.LocalClient(self._backend)
 
     def captureCliOutput(self, command, arguments, outputFormat):

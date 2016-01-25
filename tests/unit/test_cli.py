@@ -15,6 +15,23 @@ import google.protobuf.descriptor as descriptor
 import google.protobuf.internal.python_message as python_message
 
 
+class TestServerArguments(unittest.TestCase):
+    """
+    Tests that the server can parse expected arguments
+    """
+    def testParseArguments(self):
+        cliInput = """--port 7777 --host 123.4.5.6 --config MockConfigName
+        --config-file /path/to/config --tls --dont-use-reloader"""
+        parser = cli.getServerParser()
+        args = parser.parse_args(cliInput.split())
+        self.assertEqual(args.port, 7777)
+        self.assertEqual(args.host, "123.4.5.6")
+        self.assertEqual(args.config, "MockConfigName")
+        self.assertEqual(args.config_file, "/path/to/config")
+        self.assertTrue(args.tls)
+        self.assertTrue(args.dont_use_reloader)
+
+
 class TestGa2VcfArguments(unittest.TestCase):
     """
     Tests the ga2vcf cli can parse all arguments it is supposed to

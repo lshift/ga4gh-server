@@ -313,7 +313,7 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
     Class representing a single variant set backed by a directory of indexed
     VCF or BCF files.
     """
-    def __init__(self, parentContainer, localId, dataDir, backend):
+    def __init__(self, parentContainer, localId, dataDir, dataRepository):
         super(HtslibVariantSet, self).__init__(parentContainer, localId)
         self._dataDir = dataDir
         self._setAccessTimes(dataDir)
@@ -535,11 +535,7 @@ class HtslibVariantSet(datamodel.PysamDatamodelMixin, AbstractVariantSet):
         # NOTE: filters in not included in metadata unless needed
         for prefix, content in [("FORMAT", formats), ("INFO", infos)]:
             for contentKey, value in content:
-                attrs = dict(value.header.attrs)
-                # TODO: refactor description at next pysam release
-                # since description will be implemented as a member of
-                # VariantMetadata
-                description = attrs.get('Description', '').strip('"')
+                description = value.description.strip('"')
                 key = "{0}.{1}".format(prefix, value.name)
                 if key != "FORMAT.GT":
                     ret.append(buildMetadata(
