@@ -57,8 +57,11 @@ class ProtobufGenerator(object):
                 return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]
             return cmp(normalize(version1), normalize(version2))
 
-        protocs = [os.path.realpath(x) for x in "%s/protobuf/src/protoc" % server,
-                   find_in_path("protoc") if x is not None]
+        protocs = [
+            os.path.realpath(x) for x in
+            "%s/protobuf/src/protoc" % server,
+            find_in_path("protoc")
+            if x is not None]
         protoc = None
         for c in protocs:
             if not os.path.exists(c):
@@ -74,8 +77,9 @@ class ProtobufGenerator(object):
                 break
 
             except Exception:
-                print ("Not using {path} because it returned " + \
-                    "'{version}' rather than \"libprotoc <version>\", where " + \
+                print (
+                    "Not using {path} because it returned " +
+                    "'{version}' rather than \"libprotoc <version>\", where " +
                     "<version> >= 3.0.0").format(path=c, format=output)
 
         if protoc is None:
@@ -84,12 +88,14 @@ class ProtobufGenerator(object):
 
         protos = []
         for root, dirs, files in os.walk(src):
-            protos.extend(
-                [os.path.join(root, f) for f in fnmatch.filter(files, "*.proto")])
+            protos.extend([
+                os.path.join(root, f)
+                for f in fnmatch.filter(files, "*.proto")])
         if len(protos) == 0:
             raise Exception("Didn't find any proto files in %s" % src)
         cmd = "{protoc} -I {src} --python_out={server} {proto_files}".format(
-            protoc=protoc, src=src, server=server, proto_files=" ".join(protos))
+            protoc=protoc, src=src,
+            server=server, proto_files=" ".join(protos))
         os.system(cmd)
 
         proto_folder = os.path.join(server, "proto")
@@ -103,8 +109,11 @@ class ProtobufGenerator(object):
 def main():
     parser = argparse.ArgumentParser(
             description="Script to process GA4GH Protocol buffer schemas")
-    parser.add_argument("version", help="Version number of the schema we're compiling")
-    parser.add_argument("--schema-path", default="../schemas", help="Path to schemas. Default is ../schemas")
+    parser.add_argument(
+        "version", help="Version number of the schema we're compiling")
+    parser.add_argument(
+        "--schema-path", default="../schemas",
+        help="Path to schemas. Default is ../schemas")
     args = parser.parse_args()
     pb = ProtobufGenerator(args.version)
     pb.run(args)
