@@ -15,17 +15,15 @@ class ProtobufGenerator(object):
     def __init__(self, version):
         self.version = version
 
-    def run(self):
-        # presume schemas is a sibling of this codebase
-        # make use of the extra "proto" directory that CH has put in there
+    def run(self, args):
         script_path = os.path.dirname(os.path.realpath(__file__))
         server = os.path.realpath(os.path.join(script_path, ".."))
-        schemas = os.path.join(server, "../schemas")
+        schemas = os.path.join(server, args.schema_path)
 
         if not os.path.exists(schemas):
             raise Exception(
                 "Can't find schemas folder. " +
-                "Assumed it would be at %s" % os.path.realpath(schemas))
+                "Thought it would be at %s" % os.path.realpath(schemas))
 
         src = os.path.realpath(os.path.join(schemas, "src/main/resources"))
 
@@ -62,16 +60,16 @@ class ProtobufGenerator(object):
             try:
                 (lib, version) = output.split(" ")
                 if lib != "libprotoc":
-                    raise Exception
+                    raise Exception("lib didn't match 'libprotoc'")
                 if version_compare("3.0.0", version) > 0:
-                    raise Exception
+                    raise Exception("version < 3.0.0")
                 protoc = c
                 break
 
             except Exception:
-                print ("Not using %s because it returned " + \
-                    "'%s' rather than \"libprotoc <version>\", where " + \
-                    "<version> >= 3.0.0") % (c, output)
+                print ("Not using {path} because it returned " + \
+                    "'{version}' rather than \"libprotoc <version>\", where " + \
+                    "<version> >= 3.0.0").format(path=c, format=output)
 
         if protoc is None:
             raise Exception("Can't find a good protoc. Tried %s" % protocs)
@@ -83,8 +81,8 @@ class ProtobufGenerator(object):
                 [os.path.join(root, f) for f in fnmatch.filter(files, "*.proto")])
         if len(protos) == 0:
             raise Exception("Didn't find any proto files in %s" % src)
-        cmd = "%s -I %s --python_out=%s %s" % \
-            (protoc, src, server, " ".join(protos))
+        cmd = "{protoc} -I {src} --python_out={server} {proto_files}".format(
+            protoc=protoc, src=src, server=server, proto_files=" ".join(protos))
         os.system(cmd)
 
         proto_folder = os.path.join(server, "proto")
@@ -98,10 +96,11 @@ class ProtobufGenerator(object):
 def main():
     parser = argparse.ArgumentParser(
             description="Script to process GA4GH Protocol buffer schemas")
-    parser.add_argument("version")
+    parser.add_argument("version", help="Version number of the schema we're compiling")
+    parser.add_argument("--schema-path", default="../schemas", help="Path to schemas. Default is ../schemas")
     args = parser.parse_args()
     pb = ProtobufGenerator(args.version)
-    pb.run()
+    pb.run(args)
 
 if __name__ == "__main__":
     main()
