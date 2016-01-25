@@ -1,8 +1,11 @@
-#!/usr/bin/python
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
-from os import pathsep, defpath, environ, walk, system
-from os.path import exists, realpath, join, dirname
-from subprocess import check_output
+
+import os
+import os.path
+import subprocess
 import fnmatch
 import re
 import argparse
@@ -15,31 +18,31 @@ class ProtobufGenerator(object):
     def run(self):
         # presume schemas is a sibling of this codebase
         # make use of the extra "proto" directory that CH has put in there
-        script_path = dirname(realpath(__file__))
-        server = realpath(join(script_path, ".."))
-        schemas = join(server, "../schemas")
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        server = os.path.realpath(os.path.join(script_path, ".."))
+        schemas = os.path.join(server, "../schemas")
 
-        if not exists(schemas):
+        if not os.path.exists(schemas):
             raise Exception(
                 "Can't find schemas folder. " +
-                "Assumed it would be at %s" % realpath(schemas))
+                "Assumed it would be at %s" % os.path.realpath(schemas))
 
-        src = realpath(join(schemas, "src/main/resources"))
+        src = os.path.realpath(os.path.join(schemas, "src/main/resources"))
 
-        if not exists(join(server, "proto")):
+        if not os.path.exists(os.path.join(server, "proto")):
             raise Exception(
                 "Can't find destination python directory %s"
-                % realpath(join(server, "proto")))
+                % os.path.realpath(os.path.join(server, "proto")))
 
-        if not exists(src):
+        if not os.path.exists(src):
             raise Exception(
-                "Can't find source proto directory %s" % realpath(src))
+                "Can't find source proto directory %s" % os.path.realpath(src))
 
         def find_in_path(cmd):
-            PATH = environ.get("PATH", defpath).split(pathsep)
+            PATH = os.environ.get("PATH", os.defpath).split(os.pathsep)
             for x in PATH:
-                possible = join(x, cmd)
-                if exists(possible):
+                possible = os.path.join(x, cmd)
+                if os.path.exists(possible):
                     return possible
             return None
 
@@ -49,13 +52,13 @@ class ProtobufGenerator(object):
                 return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]
             return cmp(normalize(version1), normalize(version2))
 
-        protocs = [realpath(x) for x in "%s/protobuf/src/protoc" % server,
+        protocs = [os.path.realpath(x) for x in "%s/protobuf/src/protoc" % server,
                    find_in_path("protoc") if x is not None]
         protoc = None
         for c in protocs:
-            if not exists(c):
+            if not os.path.exists(c):
                 continue
-            output = check_output([c, "--version"]).strip()
+            output = subprocess.check_output([c, "--version"]).strip()
             try:
                 (lib, version) = output.split(" ")
                 if lib != "libprotoc":
@@ -66,28 +69,28 @@ class ProtobufGenerator(object):
                 break
 
             except Exception:
-                print "Not using %s because it returned " + \
+                print ("Not using %s because it returned " + \
                     "'%s' rather than \"libprotoc <version>\", where " + \
-                    "<version> >= 3.0.0" % (c, output)
+                    "<version> >= 3.0.0") % (c, output)
 
         if protoc is None:
             raise Exception("Can't find a good protoc. Tried %s" % protocs)
-        print "Using %s for protoc" % protoc
+        print ("Using %s for protoc" % protoc)
 
         protos = []
-        for root, dirs, files in walk(src):
+        for root, dirs, files in os.walk(src):
             protos.extend(
-                [join(root, f) for f in fnmatch.filter(files, "*.proto")])
+                [os.path.join(root, f) for f in fnmatch.filter(files, "*.proto")])
         if len(protos) == 0:
             raise Exception("Didn't find any proto files in %s" % src)
         cmd = "%s -I %s --python_out=%s %s" % \
             (protoc, src, server, " ".join(protos))
-        system(cmd)
+        os.system(cmd)
 
-        proto_folder = join(server, "proto")
-        for root, dirs, files in walk(proto_folder):
-            print "Creating __init__.py in %s" % root
-            with file(join(root, "__init__.py"), "w") as f:
+        proto_folder = os.path.join(server, "proto")
+        for root, dirs, files in os.walk(proto_folder):
+            print ("Creating __init__.py in %s" % root)
+            with file(os.path.join(root, "__init__.py"), "w") as f:
                 if root == proto_folder:
                     f.write("version = '%s'" % self.version)
 
