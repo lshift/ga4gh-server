@@ -1,3 +1,10 @@
+"""
+A script to generate the schemas for the GA4GH protocol. These are generated
+from a copy of the Protocol Buffers schema and use it to generate
+the Python class definitions in proto/. These are also stored in revision
+control to aid Travis building.
+"""
+
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
