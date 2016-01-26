@@ -299,10 +299,10 @@ class DatamodelObject(object):
     def __init__(self, parentContainer, localId):
         self._parentContainer = parentContainer
         self._localId = localId
-        self.parentId = None
+        parentId = None
         if parentContainer is not None:
-            self.parentId = parentContainer.getCompoundId()
-        self._compoundId = self.compoundIdClass(self.parentId, localId)
+            parentId = parentContainer.getCompoundId()
+        self._compoundId = self.compoundIdClass(parentId, localId)
 
     def getId(self):
         """
@@ -334,12 +334,6 @@ class DatamodelObject(object):
         to.
         """
         return self._parentContainer
-
-    def getParentId(self):
-        """
-        Returns the parentId of this DatamodelObject
-        """
-        return self.parentId
 
 
 class PysamDatamodelMixin(object):
