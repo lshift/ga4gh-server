@@ -46,7 +46,6 @@ def _parsePageToken(pageToken, numValues):
         values = map(int, tokens)
     except ValueError:
         msg = "Malformed integers in page token"
-        raise
         raise exceptions.BadPageTokenException(msg)
     return values
 
