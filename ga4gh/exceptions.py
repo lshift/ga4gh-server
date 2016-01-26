@@ -139,6 +139,11 @@ class InvalidJsonException(BadRequestException):
 
 
 class Validator(object):
+    """
+    Check that a JSON dictionary is a valid representation of a protocol
+    buffer class
+    """
+
     def __init__(self, class_):
         self.class_ = class_
         self.schema = class_.DESCRIPTOR
