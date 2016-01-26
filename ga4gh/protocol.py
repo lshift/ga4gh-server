@@ -169,6 +169,13 @@ class SearchResponseBuilder(object):
         obj = attr.add()
         obj.CopyFrom(protocolElement)
 
+    def getResponseLength(self):
+        """
+        As the response form is JSON, we need to convert to JSON before getting
+        the length. The length of the _protoObject itself would be incorrect
+        """
+        return len(toJson(self._protoObject))
+
     def isFull(self):
         """
         Returns True if the response buffer is full, and False otherwise.
@@ -179,11 +186,13 @@ class SearchResponseBuilder(object):
         If page_size or max_response_length were not set in the request
         then they're not checked.
         """
+
         return (
             (self._pageSize > 0 and self._numElements >= self._pageSize) or
+            # We check _maxResponseLength first as getResponseLength is
+            # expensive and Python lazy evaluates "and" operations
             (self._maxResponseLength > 0 and
-             len(toJson(self._protoObject, indent=None)) >=
-                self._maxResponseLength)
+             self.getResponseLength() >= self._maxResponseLength)
         )
 
     def getSerializedResponse(self):
