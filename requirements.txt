@@ -17,7 +17,6 @@ oic==0.7.6
 pyOpenSSL==0.15.1
 lxml==3.4.4
 protobuf==3.0.0b1.post1
-datetime
 # Requirements for test OIDC provider.
 cherrypy==3.2.4
 pyaml==15.03.1
