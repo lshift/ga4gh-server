@@ -242,11 +242,11 @@ class HtslibReadGroupSet(datamodel.PysamDatamodelMixin, AbstractReadGroupSet):
             for htslibProgram in htslibPrograms:
                 program = protocol.ReadGroup.Program()
                 program.id = htslibProgram['ID']
-                program.command_line = \
-                    htslibProgram.get('CL', pb.DEFAULT_STRING)
+                program.command_line = htslibProgram.get(
+                    'CL', pb.DEFAULT_STRING)
                 program.name = htslibProgram.get('PN', pb.DEFAULT_STRING)
-                program.prev_program_id = \
-                    htslibProgram.get('PP', pb.DEFAULT_STRING)
+                program.prev_program_id = htslibProgram.get(
+                    'PP', pb.DEFAULT_STRING)
                 program.version = htslibProgram.get('VN', pb.DEFAULT_STRING)
                 programs.append(program)
         self._programs = programs

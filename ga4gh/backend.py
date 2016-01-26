@@ -427,8 +427,8 @@ class Backend(object):
         Returns a generator over the (callSet, nextPageToken) pairs defined
         by the specified request.
         """
-        compoundId = datamodel.VariantSetCompoundId \
-            .parse(request.variant_set_id)
+        compoundId = datamodel.VariantSetCompoundId.parse(
+            request.variant_set_id)
         dataset = self.getDataRepository().getDataset(compoundId.dataset_id)
         variantSet = dataset.getVariantSet(compoundId.variant_set_id)
         if request.name == "":
