@@ -182,11 +182,11 @@ class AbstractReference(datamodel.DatamodelObject):
         super(AbstractReference, self).__init__(parentContainer, localId)
         self._length = -1
         self._md5checksum = ""
-        self._sourceUri = None
+        self._sourceUri = ""
         self._sourceAccessions = []
         self._isDerived = False
-        self._sourceDivergence = None
-        self._ncbiTaxonId = None
+        self._sourceDivergence = pb.DEFAULT_INT
+        self._ncbiTaxonId = ""
 
     def getLength(self):
         """
